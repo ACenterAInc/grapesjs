@@ -23,6 +23,13 @@ module.exports = ComponentView.extend({
    * @private
    * */
   enableEditing(e) {
+    console.log('ENABLE EDITING HERE A')
+    if (window.editor.getConfig().tagEditorOnly) {
+      //ACETODO: dbclick doubleclick
+      // alert('ok here we open modals....?')
+      return;
+    }
+
     var editable = this.model.get('editable');
     if(this.rte && editable) {
       try {

@@ -47,7 +47,7 @@ module.exports = Backbone.Model.extend({
 
     for(var type in this.mapJs) {
       var mapType = this.mapJs[type];
-      var ids = '#' + mapType.ids.join(', #');
+      var ids = '#' + mapType.ids.join(', #');      
       code += 'var items = document.querySelectorAll("'+ids+'");' +
         'for (var i = 0, len = items.length; i < len; i++) {'+
           '(' + mapType.code + '.bind(items[i]))();' +

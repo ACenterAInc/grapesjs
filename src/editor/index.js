@@ -2,6 +2,7 @@
  *
  * * [getConfig](#getconfig)
  * * [getHtml](#gethtml)
+ * * [getHead](#gethead)
  * * [getCss](#getcss)
  * * [getJs](#getjs)
  * * [getComponents](#getcomponents)
@@ -73,6 +74,7 @@ module.exports = config => {
   var c = config || {},
   defaults = require('./config/config'),
   EditorModel = require('./model/Editor'),
+  MD5Model = require('./model/MD5'),
   EditorView = require('./view/EditorView');
 
   for (var name in defaults) {
@@ -96,6 +98,10 @@ module.exports = config => {
      */
     editor: em,
 
+    md5: MD5Model,
+
+    md5prefix: MD5Model(window.location.pathname).substring(0,5),
+
     /**
      * @property {DomComponents}
      */
@@ -117,9 +123,19 @@ module.exports = config => {
     AssetManager: em.get('AssetManager'),
 
     /**
+     * @property {FileManager}
+     */
+    FileManager: em.get('FileManager'),
+
+    /**
      * @property {BlockManager}
      */
     BlockManager: em.get('BlockManager'),
+
+    /**
+     * @property {PageManager}
+     */
+    PageManager: em.get('PageManager'),
 
     /**
      * @property {TraitManager}
@@ -161,6 +177,10 @@ module.exports = config => {
      */
     Canvas: em.get('Canvas'),
 
+    Leftmenu: em.get('Leftmenu'),
+
+    //Text Area edit...
+    injected: null,
     /**
      * @property {UndoManager}
      */
@@ -172,6 +192,11 @@ module.exports = config => {
     DeviceManager: em.get('DeviceManager'),
 
     /**
+     * @property {HugoManager}
+     */
+    HugoManager: em.get('HugoManager'),
+
+    /**
      * @property {RichTextEditor}
      */
     RichTextEditor: em.get('rte'),
@@ -180,6 +205,11 @@ module.exports = config => {
      * @property {Utils}
      */
     Utils: em.get('Utils'),
+
+    /**
+     * @property {apiUrl}
+     */
+    apiUrl: em.get('apiUrl'),
 
     /**
      * @property {Utils}
@@ -209,7 +239,26 @@ module.exports = config => {
      * @return {string} HTML string
      */
     getHtml() {
-      return em.getHtml();
+      console.log('get html aaaaa')
+      console.log(this.injected)
+      if (this.injected == null) {
+        console.log('get html OKOK')
+        return em.getHtml();
+      } else {
+         return this.injected.value
+      }
+    },
+
+    /**
+     * Returns HTML built inside canvas
+     * @return {string} HTML string
+     */
+    getHead() {
+      console.error("EM1:");
+      // var disableLink = function(){ console.log('disabled'); return false;};
+      // $("iframe").contents().find("body").find("a").bind('click', disableLink);
+      // console.error(em);
+      return em.getHead();
     },
 
     /**
@@ -236,6 +285,10 @@ module.exports = config => {
       return em.get('DomComponents').getComponents();
     },
 
+    getHeadComponents() {
+      return em.get('DomComponents').getHeadComponents();
+    },
+
     /**
      * Set components inside editor's canvas. This method overrides actual components
      * @param {Array<Object>|Object|string} components HTML string or components model
@@ -253,6 +306,21 @@ module.exports = config => {
       em.setComponents(components);
       return this;
     },
+    setComponentsOrig(components) {
+      //console.log(em);
+      DomComponents.setComponentsOrig(components);
+      return this;
+    },
+
+    setHeadComponents(components) {
+      em.setHeadComponents(components);
+      return this;
+    },
+    setHeadComponentsOrig(components) {
+      DomComponents.setHeadComponentsOrig(components);
+      return this;
+    },
+
 
     /**
      * Add components
@@ -391,6 +459,205 @@ module.exports = config => {
       return c.el;
     },
 
+    escapeHtml (string) {
+      var entityMap = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+        '/': '&#x2F;',
+        '`': '&#x60;',
+        '=': '&#x3D;'
+      };
+
+      return String(string).replace(/[&<>"'`=\/]/g, function (s) {
+        return entityMap[s];
+      });
+    },
+
+    updatePreviewContentHugo  (  ) {
+      // jQuery is bad, but its ok for now .. jquery is already a dependency
+      // Create child and get to the 1st child element
+
+      // alert(em.get('apiUrl'));
+      console.log('updatePreviewContentHugo')
+        var that = this;
+
+        try {
+        var postData = {
+          page: null,
+          html: window.editor.getHtml()
+        }
+
+        $.ajax({
+          url      : em.get('apiUrl') + '/widgetview?widget=' + this.getParameterByName('widget'),
+          type    : 'POST',
+          data    : JSON.stringify(postData),
+          beforeSend  : function() {
+
+          },
+          error  : function (errr) {
+              // error message might contains <> elements, so we must escape them...
+              that.updatePreviewContent(that.escapeHtml(errr.responseJSON.error));
+          },
+          complete  : function () {
+
+          },
+          xhrFields  : {
+            onprogress(e) {
+              if (e.lengthComputable) {
+                //var result = e.loaded / e.total * 100 + '%';//
+              }
+            },
+            onload(e) {
+                //progress.value = 100;
+            }
+          },
+          cache: false, contentType: 'application/json', processData: false
+        }).done(data => {
+          //target.add(data.data);
+
+          console.log('updated peview data off......')
+          console.log(data)
+
+          that.updatePreviewContent(data);// "<div>aaa</div>");
+
+        }).always(() => {
+          //turnOff loading
+        });
+      } catch (ezzz) {
+        console.error(ezzz.stack)
+      }
+
+      // updatePreviewContent("<div>aaa</div>");
+    },
+
+    updatePreviewContent ( htmlStringContent ) {
+      // jQuery is bad, but its ok for now .. jquery is already a dependency
+      // Create child and get to the 1st child element
+
+/*
+      var arrDomElements = $.parseHTML("<div>" + this.escapeHtml(htmlStringContent) + "</div>");
+      console.log('parsed')
+      console.log(arrDomElements);
+      */
+      /*
+      var child = document.createElement('div');
+      child.innerHTML = htmlStringContent;
+
+      var tmpChilds = child.childNodes;
+
+      child = child.firstChild;
+
+      console.log('update prefiew.... d')
+      console.log(child)
+      */
+
+      //Remove exiting content
+      var myNode = $("#previewIframe").contents().find('body')[0];
+      console.log('update prefiew.... e')
+      while (myNode.firstChild) {
+          console.log('update prefiew.... remove')
+          myNode.removeChild(myNode.firstChild);
+      }
+      /*
+      var i = 0;
+      var len = arrDomElements.length;
+      console.log(arrDomElements);
+      for(i = 0; i < len; i++) {
+        $("#previewIframe").contents().find('body')[0].appendChild(arrDomElements[i])
+      }
+      */
+      //$("#previewIframe").contents().find('body')[0].innerHTML = "<div><li>afafa</li>" + this.escapeHtml(htmlStringContent) + "</div>";//htmlStringContent;// appendChild(arrDomElements[i])
+      $("#previewIframe").contents().find('body')[0].innerHTML = htmlStringContent;
+
+/*
+      console.log('update prefiew.... f')
+      //append new content
+      var i = 0;
+      console.log(tmpChilds)
+      console.log(tmpChilds.length)
+      // console.log('update prefiew.... faa')
+      for(i = 0; i < tmpChilds.length; i++) {
+          console.log('fchiild a');
+          console.log(tmpChilds[i])
+          if (tmpChilds[i] === undefined) {
+
+          } else {
+            //if (tmpChilds[i].nodeType == 1) {
+                $("#previewIframe").contents().find('body')[0].appendChild(tmpChilds[i])
+            // }
+          }
+              // recurseAndAdd(t[i], alldescendants);
+      }
+      console.log('update prefiew.... ccc')
+      // $("#previewIframe").contents().find('body')[0].appendChild(child);
+      */
+    },
+
+    testStaticPreviewMode() {
+      // jQuery is bad, but its ok for now .. jquery is already a dependency
+      try {
+        var child = window.document.createElement('div');
+        child.innerHTML = '<div custom-name="Box_94a88-c256" >  <h1 custom-name="Text_94a88-c257" >Welcome to {{ if not .IsHome }}{{ .Title }} | {{ end }}{{ .Site.Title }}  </h1></div>';
+        console.log('got child?')
+        console.log(child);
+        child = child.firstChild;
+        console.log('got child 1?')
+        var myNode = $("#previewIframe").contents().find('body')[0];
+        if (myNode !== undefined && myNode !== null) {
+          while (myNode.firstChild) {
+              myNode.removeChild(myNode.firstChild);
+          }
+        }
+
+        $("#previewIframe").contents().find('body')[0].appendChild(child);
+      } catch (eee) {
+        console.error(eee.stack);
+      }
+    },
+    injectTimeout: null,
+
+    enablePreviewMode() {
+
+      /*var child = document.createElement('div');
+      child.innerHTML = "<stile>.gjs-toolbar { display: none; } </style>"
+      child = child.firstChild;
+
+      var len = $("#editorIframe").contents().find('body')[0].appendChild(child);
+      */
+      var len = $("#editorIframe").contents().find('body').find("#injectHere").length
+      if (len == 1) {
+        var tmp = $("#editorIframe").contents().find('body').find("#injectHere").detach();
+        $("#codeEditIframe").contents().find('body')[0].appendChild(tmp[0]);
+        this.injected = tmp[0];
+        $("#codeEditIframe").contents().find('body').css({'margin': '0px'});
+        $("#codeEditIframe").contents().find('body').find("#injectHere").css({'width': '100%', 'min-height': '100%'});
+        var that = this;
+
+        //TODO: Set panel mode
+        // $("#gjs-pn-views-container").hide();
+        // $(".gjs-cv-canvas").addClass('fullwidth');
+        $("#codeEditIframe").contents().find('body').find("#injectHere").on('keyup',function(){
+            console.log('key up here');
+
+            if(that.qr_timeout != null) {
+                clearTimeout(that.qr_timeout);
+            }
+            console.log('key up here 1');
+            that.qr_timeout = setTimeout(function(){
+                 //Do your magic herewindow.editor.editor.updateBeforeUnload()
+                 that.editor.updateBeforeUnload()
+            }, 500);
+        });
+
+      }
+
+      $("#codeEditIframe").addClass('half').removeClass('hidden')
+      $("#editorIframe").addClass('hidden')
+      $("#previewIframe").addClass('half').addClass('topborder').addClass('whitebg')
+    },
     /**
      * Update editor dimensions and refresh data useful for positioning of tools
      *
@@ -479,8 +746,141 @@ module.exports = config => {
      * Render editor
      * @return {HTMLElement}
      */
+
+    getParameterByName(name, url) {
+        if (!url) url = window.location.href;
+        name = name.replace(/[\[\]]/g, "\\$&");
+        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, " "));
+    },
+
+    afterLoaded() {
+
+      // this.editor.Canvas.getBody().className = this.ppfx + 'dashed';
+      var that1 = this;
+      var fctEnableCanvasEdit = function(newCtr) {
+        if (newCtr  >= 100) {
+          //ah
+        //  console.log('HARD STOP')
+          return
+        }
+        var tmp = $("#editorIframe").contents().find('body');
+        var tmp1 = that1.Canvas;
+        if (tmp.length <= 0) {
+          setTimeout(function() {
+            fctEnableCanvasEdit(++newCtr)
+          }, 300);
+        } else {
+
+
+
+          /*
+          var commands = that.Commands;
+          var commandName = 'sw-visibility';
+          var command;
+
+          if (commands && typeof commandName === 'string') {
+            command  = commands.get(commandName);
+          } else if (commandName !== null && typeof commandName === 'object') {
+            command = commandName;
+          } else if (typeof commandName === 'function') {
+            command = {run: commandName};
+          }
+
+          //console.error(command);
+          //this.onDrag({button:0})
+          command.run(that);
+          that.trigger('run:' + commandName);
+          that.refresh();*/
+
+          console.log('TIGGER LOADED')
+          that1.editor.trigger('loaded');
+          return;
+
+        }
+      }
+      setTimeout(fctEnableCanvasEdit(1), 500);
+
+      if (this.getParameterByName('staticBlock') !== undefined && this.getParameterByName('staticBlock') !== null) {
+        var staticBlock = this.getParameterByName('staticBlock');
+        var allObj = this.PageManager.getAll().models;
+        var allLen = allObj.length;
+        for (var i = 0; i < allLen; i++) {
+          // console.log(allObj[i].get('ref') + " === " + staticBlock + " ? " + (allObj[i].get('ref') === staticBlock));
+          if (allObj[i].get('ref') === staticBlock) {
+            console.log('GOT IT');
+
+            console.log(allObj[i]);
+
+            var commands = this.Commands;
+            var commandName = allObj[i].get('command');
+            var command;
+
+            if (commands && typeof commandName === 'string') {
+              command  = commands.get(commandName);
+            } else if (commandName !== null && typeof commandName === 'object') {
+              command = commandName;
+            } else if (typeof commandName === 'function') {
+              command = {run: commandName};
+            }
+
+            //console.error(command);
+            //this.onDrag({button:0})
+            command.run(this, allObj[i], allObj[i].get('options'));
+            this.trigger('run:' + commandName);
+            return;
+          }
+        }
+      } else if (this.getParameterByName('editMode') !== undefined) {
+          if (this.getParameterByName('editMode') === 'widget') {
+              // em.set('editorPreview', true)
+              this.editor.set('editorPreview', true);
+              var that = this;
+
+              var fctEnablePreview = function(newCtr) {
+                if (newCtr  >= 100) {
+                  //ah
+                //  console.log('HARD STOP')
+                  return
+                }
+                var tmp = $("#previewIframe").contents().find('body')
+                console.log('tmp is')
+                console.log(tmp)
+                if (tmp.length <= 0) {
+                  // console.log('tmp is NOT VALID')
+                  setTimeout(function() {
+                    fctEnablePreview(++newCtr)
+                  }, 1200);
+                } else {
+                  // console.log('tmp is VALID')
+                  that.enablePreviewMode();
+                  that.editor.triggerPreviewMode();
+                }
+              }
+              setTimeout(fctEnablePreview(1), 500);
+          }
+      }
+
+
+      console.log('after load completed')
+      console.log($("#previewIframe"));
+//      $("#previewIframe").attr('src','http://www.google.ca')
+
+      /*$("#editorIframe").css({ 'min-height': '50%', 'height': '50%!important' });
+      $("#previewIframe").css({ 'min-height': '50%', 'height': '50%!important' });*/
+    },
+
     render() {
-      return  editorView.render().el;
+      var tmp = editorView.render().el;
+      window.editorInitialized=true;
+      console.error("COP1");
+      em.get('DomComponents').setComponentOrig(this.getComponents());
+      em.get('DomComponents').setHeadComponentOrig(this.getHeadComponents());
+
+      //this.setComponentsOrig(this.getComponents());
     },
 
   };

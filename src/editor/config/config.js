@@ -3,11 +3,15 @@ module.exports = {
   // Style prefix
   stylePrefix: 'gjs-',
 
+  apiUrl: '/',
+
   //TEMP
   components: '',
 
   // Enable/Disable possibility to copy(ctrl + c) & paste(ctrl + v) components
   copyPaste: true,
+
+  tagEditorOnly: false,
 
   // Show an alert before unload the page with unsaved changes
   noticeOnUnload: true,
@@ -17,6 +21,8 @@ module.exports = {
 
   // Show paddings and margins
   showOffsets: false,
+
+  locationprefix: '',
 
   // Show paddings and margins on selected component
   showOffsetsSelected: false,
@@ -38,7 +44,7 @@ module.exports = {
   width: '100%',
 
   // CSS that could only be seen (for instance, inside the code viewer)
-  protectedCss: '',
+  protectedCss: '*{box-sizing: border-box;} body{margin: 0;}',
 
   // CSS for the iframe which containing the canvas, useful if you need to custom something inside
   // (eg. the style of the selected component)
@@ -68,6 +74,10 @@ module.exports = {
 
   //Configurations for Asset Manager
   assetManager: {},
+
+  //Configurations for File Manager
+  fileManager: {},
+
 
   //Configurations for Canvas
   canvas: {},
@@ -119,6 +129,8 @@ module.exports = {
     }],
   },
 
+  hugoManager: {},
+
   //Configurations for Style Manager
   styleManager: {
 
@@ -156,7 +168,27 @@ module.exports = {
   },
 
   //Configurations for Block Manager
+  pageManager: {
+    blocks: [
+      {
+        id: 'create',
+        label: 'Create Html Page',
+        category: 'Pages',
+        command: 'create-file',
+        attributes: {class:'gjs-block-category'}
+      },
+      {
+        id: 'create',
+        label: 'Not yet implemented',
+        category: 'Dynamic Blocks',
+        command: 'create-partialfile',
+        attributes: {class:'gjs-block-category'}
+      }
+    ]
+  },
+
   blockManager: {
+    /*
     blocks: [{
         id: 'b1',
         label: '1 Block',
@@ -289,17 +321,20 @@ module.exports = {
             width: '615px',
           }
         },
-      }/*,{
-        id: 'table',
-        label: 'Table',
-        attributes: {class:'fa fa-table'},
-        content: {
-          type: 'table',
-          columns: 3,
-          rows: 5,
-          style: {height: '150px', width: '100%'}
-        },
-      }*/],
+
+      ],
+      */
   },
 
 };
+/*,{
+  id: 'table',
+  label: 'Table',
+  attributes: {class:'fa fa-table'},
+  content: {
+    type: 'table',
+    columns: 3,
+    rows: 5,
+    style: {height: '150px', width: '100%'}
+  },
+}*/

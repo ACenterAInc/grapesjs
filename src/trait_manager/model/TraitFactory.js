@@ -26,7 +26,7 @@ module.exports = (() => ({
 
       // Define placeholder
       switch (prop) {
-        case 'title': case 'alt': case 'id':
+        case 'title': case 'alt':
           obj.placeholder = 'eg. Text here';
           break;
         case 'href':

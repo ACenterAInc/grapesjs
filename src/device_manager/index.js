@@ -54,6 +54,8 @@ module.exports = () => {
           collection: devices,
           config: c
         });
+        console.log("returning view");
+        console.log(view);
         return this;
       },
 
@@ -102,7 +104,7 @@ module.exports = () => {
        * @return {string} HTML string
        * @private
        */
-      render() {
+      render() {        
         return view.render().el;
       },
 

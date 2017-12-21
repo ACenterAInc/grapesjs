@@ -141,17 +141,32 @@ module.exports = {
     e.stopPropagation();
     var trg = e.target;
 
-    // Adjust tools scroll top
-    if(!this.adjScroll){
-      this.adjScroll = 1;
-      this.onFrameScroll(e);
-      this.updateAttached();
+    console.log("MOUSE OVER");
+    var isValid = true;
+    if (window.editor.getConfig().tagEditorOnly) {
+
+      if (trg === undefined || $(trg) === undefined) {
+        return;
+      }
+
+      if (!(($(trg).attr('data-highlightable') >= 0))) {
+        isValid = false;
+      }
     }
 
-    var pos = this.getElementPos(trg);
-    this.updateBadge(trg, pos);
-    this.updateHighlighter(trg, pos);
-    this.showElementOffset(trg, pos);
+    if (isValid) {
+      // Adjust tools scroll top
+      if(!this.adjScroll){
+        this.adjScroll = 1;
+        this.onFrameScroll(e);
+        this.updateAttached();
+      }
+
+      var pos = this.getElementPos(trg);
+      this.updateBadge(trg, pos);
+      this.updateHighlighter(trg, pos);
+      this.showElementOffset(trg, pos);
+    }
   },
 
   /**
@@ -234,6 +249,24 @@ module.exports = {
     var s  = m.get('stylable');
     if(!(s instanceof Array) && !s)
       return;
+
+    console.log('on click of model');
+    console.log(m);
+
+    var isValid = true;
+    console.log('MODEL HIGHLIGHT ?');
+    console.log(m.get('highlightable'));
+    console.log(m.attributes.highlightable);
+
+    if (! m.get('highlightable')) {
+      console.log('NOPE NOT HIGHLIGHTABLE triggering');
+      console.error(e);
+      console.error(e.target);
+      $(e.target).closest('[data-param]').trigger('click')
+      // $("#editorIframe").contents().find("body").find(".dropdown").closest('[data-param]').trigger('click')
+      return;
+    }
+
     this.onSelect(e, e.target);
   },
 
@@ -250,7 +283,7 @@ module.exports = {
     if(!model || !model.get('badgable'))
       return;
     var badge = this.getBadge();
-    badge.innerHTML = model.getName();
+    badge.innerHTML = model.getCurrentName();
     var bStyle = badge.style;
     var u = 'px';
     bStyle.display = 'block';
@@ -334,11 +367,40 @@ module.exports = {
     if(!model){
       return;
     }
+
+    var isValid = true;
+    console.error('MODEL TEST')
+    console.error(this);
+    console.error('GOT MODEL')
+    console.error(model);
+
+    console.log('MODEL HIGHLIGHT ?');
+    console.log(model.get('highlightable'));
+    console.log(model.attributes.highlightable);
+
+    if (! model.get('highlightable')) {
+      console.log('NOPE');
+      return;
+    }
+
+    /*if (window.editor.getConfig().tagEditorOnly) {
+      if (!(($(model).attr('data-highlightable') >= 0))) {
+        isValid = false;
+      }
+    }
+
+    if (isValid) {
+    */
+
     var toolbar = model.get('toolbar');
     var ppfx = this.ppfx;
     var showToolbar = em.get('Config').showToolbar;
     var toolbarEl = this.canvas.getToolbarEl();
     var toolbarStyle = toolbarEl.style;
+
+    if (window.editor.getConfig().tagEditorOnly) {
+      showToolbar = false;
+    }
 
     if (showToolbar && toolbar && toolbar.length) {
       toolbarStyle.display = 'flex';
@@ -419,6 +481,7 @@ module.exports = {
       var model = this.em.get('selectedComponent');
 
       if (model) {
+        console.log('on frame scroll');
         this.updateToolbarPos(model.view.el);
       }
     }
@@ -432,8 +495,24 @@ module.exports = {
     var model = this.em.get('selectedComponent');
     if (model) {
       var view = model.view;
-      this.updateToolbarPos(view.el);
-      this.showFixedElementOffset(view.el);
+      console.log('update attach');
+
+
+      var isValid = true;
+
+      if (window.editor.getConfig().tagEditorOnly) {
+
+        if (!(model.get('highlightable'))) {
+          isValid = false;
+        }
+      }
+
+      if (isValid) {
+
+        this.updateToolbarPos(view.el);
+        this.showFixedElementOffset(view.el);
+
+      }
     }
   },
 

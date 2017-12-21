@@ -14,7 +14,7 @@ module.exports = config => {
      * @return {Object}
      * @example
      * var stl = ParserHtml.parseStyle('color:black; width:100px; test:value;');
-     * console.log(stl);
+     * // console.log(stl);
      * // {color: 'black', width: '100px', test: 'value'}
      */
     parseStyle(str) {
@@ -36,7 +36,7 @@ module.exports = config => {
      * @return {Array<string>}
      * @example
      * var res = ParserHtml.parseClass('test1 test2 test3');
-     * console.log(res);
+     * // console.log(res);
      * // ['test1', 'test2', 'test3']
      */
     parseClass(str) {
@@ -92,6 +92,12 @@ module.exports = config => {
         if(!model.tagName)
           model.tagName = node.tagName ? node.tagName.toLowerCase() : '';
 
+        // console.log(model)
+        if (model.tagName === "a") {
+          model.type="link"
+        }
+        // console.log(model)
+
         if(attrsLen)
           model.attributes = {};
 
@@ -126,6 +132,7 @@ module.exports = config => {
           var firstChild = node.childNodes[0];
           if(nodeChild === 1 && firstChild.nodeType === 3){
             if(!model.type){
+              // console.log('NO TYPE?')
               model.type = 'text';
             }
             model.content = firstChild.nodeValue;
@@ -135,7 +142,12 @@ module.exports = config => {
             // TO: <div> TEST </div> <-- div become text type
             if(parsed.length == 1 && parsed[0].type == 'text' &&
               parsed[0].tagName == TEXT_NODE){
-              model.type = 'text';
+              //ensure to set type link even though its TEXT_NODE? but tagName is a ...
+              if (model.tagName === "a") {
+                model.type="link"
+              } else {
+                model.type = 'text';
+              }
               model.content = parsed[0].content;
             }else
               model.components = parsed;
@@ -144,6 +156,7 @@ module.exports = config => {
 
         // Check if it's a text node and if could be moved to the prevous model
         if(model.type == 'textnode'){
+          // console.log('PARSED MODEL IS TEXT')
           var prevIsText = prevSib && prevSib.type == 'textnode';
           if(prevIsText){
             prevSib.content += model.content;
@@ -170,11 +183,16 @@ module.exports = config => {
               allTxt = 0;
               break;
             }
-            if(comp.type == 'textnode')
+            if(comp.type == 'textnode') {
+              // console.log('FOUND TEXT')
               foundTextNode = 1;
+            }
           }
-          if(allTxt && foundTextNode)
+          if(allTxt && foundTextNode) {
+            // console.log('SET TYPE TO TEXT??')
+            // console.log(model)
             model.type = 'text';
+          }
         }
 
         // If tagName is still empty and is not a textnode, do not push it

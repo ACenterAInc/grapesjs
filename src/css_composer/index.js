@@ -135,10 +135,26 @@ module.exports = () => {
           return;
         var obj = {};
         var keys = this.storageKey();
-        if(keys.indexOf('css') >= 0)
+        if(keys.indexOf('css') >= 0) {
+          /*
+          try {
+            aaa();
+          }catch(e) {
+            console.error(e.stack);
+          }
+          alert('z');*/
           obj.css = c.em.getCss();
-        if(keys.indexOf('styles') >= 0)
+        }
+        if(keys.indexOf('styles') >= 0) {
+          /*
+          try {
+            aaa();
+          }catch(e) {
+            console.error(e.stack);
+          }
+          alert('z');*/
           obj.styles = JSON.stringify(rules);
+        }
         if(!noStore)
           c.stm.store(obj);
         return obj;

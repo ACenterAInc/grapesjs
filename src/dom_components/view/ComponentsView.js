@@ -18,7 +18,28 @@ module.exports = Backbone.View.extend({
    * */
   addTo(model) {
     var i  = this.collection.indexOf(model);
+    /*console.error("AafafDD TTAT");console.error("AafafDD TTAT");console.error("AafafDD TTAT");console.error("AafafDD TTAT");console.error("AafafDD TTAT");
+    console.error(model);
+    try {
+      dsfsf();
+    } catch (z) {
+      console.error(z.stack);
+    }*/
+    if (window.editor !== undefined) {
+      model.customid = model.cid + "_" + editor.md5prefix;
+      console.error("ADDDDDDDDDED");
+      console.error(model);
+    }
+
+    //'gen_'
+    /*var len = model.attributes.classes.models;
+    for (var k = 0; k < len; k++) {
+      model.attributes.classes.models[k].customid=model.cid + "_" + editor.md5prefix;
+    }*/
+    //model.attributes.classes.models[0].customid= model.cid + "_" + editor.md5prefix;
+
     this.addToCollection(model, null, i);
+
 
     var em = this.config.em;
     if(em) {

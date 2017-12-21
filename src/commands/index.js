@@ -65,7 +65,7 @@ module.exports = () => {
     /**
      * Initialize module. Automatically called with a new instance of the editor
      * @param {Object} config Configurations
-     * @private
+     * @privateobl
      */
     init(config) {
       c = config || {};
@@ -98,7 +98,10 @@ module.exports = () => {
       defaultCommands['open-sm'] = require('./view/OpenStyleManager');
       defaultCommands['open-tm'] = require('./view/OpenTraitManager');
       defaultCommands['open-blocks'] = require('./view/OpenBlocks');
+      defaultCommands['list-pages'] = require('./view/ListPages');
       defaultCommands['open-assets'] = require('./view/OpenAssets');
+      defaultCommands['create-file'] = require('./view/CreateFile');
+      defaultCommands['block-edit'] = require('./view/EditBlock');
       defaultCommands['show-offset'] = require('./view/ShowOffset');
       defaultCommands.fullscreen = require('./view/Fullscreen');
       defaultCommands.preview = require('./view/Preview');
@@ -160,7 +163,6 @@ module.exports = () => {
             em.set('selectedComponent', sel);
             ed.trigger('component:update', sel);
             dragger && dragger.blur();
-            console.log('onEnd ', opts);
           };
 
           const onDrag = (e, opts) => {

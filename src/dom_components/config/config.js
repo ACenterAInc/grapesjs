@@ -11,11 +11,18 @@ module.exports = {
     stylable: ['background','background-color','background-image', 'background-repeat','background-attachment','background-position'],
     draggable: false,
     badgable: false,
+
+    heads: [],
+    heads_ori: [],
+
     components: [],
+    components_ori: [],
   },
 
   // Could be used for default components
   components: [],
+  // Could be used for default components
+  heads: [],
 
   rte: {},
 

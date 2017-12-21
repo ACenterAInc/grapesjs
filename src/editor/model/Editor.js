@@ -2,6 +2,7 @@ var deps = [
 require('utils'),
 require('storage_manager'),
 require('device_manager'),
+require('hugo_manager'),
 require('parser'),
 require('selector_manager'),
 require('modal_dialog'),
@@ -10,11 +11,14 @@ require('panels'),
 require('rich_text_editor'),
 require('style_manager'),
 require('asset_manager'),
+require('file_manager'),
 require('css_composer'),
 require('dom_components'),
+require('leftmenu'),
 require('canvas'),
 require('commands'),
 require('block_manager'),
+require('page_manager'),
 require('trait_manager'),
 ];
 
@@ -30,6 +34,7 @@ module.exports = Backbone.Model.extend({
     selectedComponent: null,
     previousModel: null,
     changesCount:  0,
+    editorPreview: false,
     storables: [],
     toLoad: [],
     opened: {},
@@ -70,6 +75,18 @@ module.exports = Backbone.Model.extend({
       window.onbeforeunload = e => 1;
     } else {
       window.onbeforeunload = null;
+    }
+    console.log('GOT NEW CHANGES HERE');
+    if (this.get('editorPreview')) {
+       this.triggerPreviewMode();
+    }
+  },
+
+  triggerPreviewMode () {
+    try {
+      this.get('Editor').updatePreviewContentHugo();
+    } catch (ew) {
+      // this.get('Editor').testStaticPreviewMode();
     }
   },
 
@@ -228,6 +245,17 @@ module.exports = Backbone.Model.extend({
   componentsUpdated(model, val, opt) {
     var updatedCount = this.get('changesCount') + 1,
         avSt  = opt ? opt.avoidStore : 0;
+
+    console.error("t changes count" + updatedCount + " for " );
+    console.error(model);
+    console.error(val);
+    console.error(this);
+    if (model != undefined)  {
+        model.set('changesCount', updatedCount);
+    } else {
+
+    }
+
     this.set('changesCount', updatedCount);
     var stm = this.get('StorageManager');
     if(stm.isAutosave() && updatedCount < stm.getStepsBeforeSave()){
@@ -284,6 +312,25 @@ module.exports = Backbone.Model.extend({
 
     if(!avSt)
       this.componentsUpdated();
+
+      //this.set('createdComponent',0);
+      //this.set('updatedCount',0);
+
+
+      if (window.editorInitialized !== undefined) {
+        console.log("BB");
+        if (window.editorInitialized == true) {
+          console.log("EE");
+          try {
+            jflsdjf();
+          } catch(ew) {
+            console.error(ew.stack);
+          }
+          model.set('createdComponent',1);
+          model.set('updatedCount',1);
+        }
+      }
+
   },
 
   /**
@@ -293,6 +340,10 @@ module.exports = Backbone.Model.extend({
    */
   initChildrenComp(model) {
       var comps  = model.get('components');
+
+      //console.log("COMPOTENET INIT " + window.editorInitialized);
+      //console.log(model);
+
       this.updateComponents(model, null, { avoidStore : 1 });
       comps.each(function(md) {
           this.initChildrenComp(md);
@@ -309,7 +360,11 @@ module.exports = Backbone.Model.extend({
    * @private
    * */
   rmComponents(model, val, opt) {
+    //alert('rm component');
     var avSt  = opt ? opt.avoidStore : 0;
+
+    //TODO: Keep track of elements deled ??
+    var cmp = this.get('DomComponents');
 
     if(!avSt)
       this.componentsUpdated();
@@ -350,6 +405,33 @@ module.exports = Backbone.Model.extend({
     return cm.getCode(wrp, 'json');
   },
 
+
+  /**
+   * Set header components inside editor's canvas. This method overrides actual components
+   * @param {Object|string} header components HTML string or components model
+   * @return {this}
+   * @private
+   */
+  setHeadComponents(components) {
+    return this.get('DomComponents').setHeadComponents(components);
+  },
+
+  /**
+   * Returns components model from the editor's head canvas
+   * @return {Components}
+   * @private
+   */
+  getHeadComponents() {
+    var cmp = this.get('DomComponents');
+    var cm = this.get('CodeManager');
+
+    if(!cmp || !cm)
+      return;
+
+    var wrp  = cmp.getHeadComponents();
+    return cm.getCode(wrp, 'json'); //todo????
+  },
+
   /**
    * Set style inside editor's canvas. This method overrides actual style
    * @param {Object|string} style CSS string or style model
@@ -387,6 +469,19 @@ module.exports = Backbone.Model.extend({
   },
 
   /**
+   * Returns HTML Head built inside canvas
+   * @return {string} Html string
+   * @private
+   */
+  getHead() {
+    var js = '';
+    var wrp  = this.get('DomComponents').getHeadComponents();
+    var html = this.get('CodeManager').getCode(wrp, 'html');
+    html += js ? '<script>'+ js +'</script>' : '';
+    return html;
+  },
+
+  /**
    * Returns CSS built inside canvas
    * @return {string} CSS string
    * @private
@@ -416,6 +511,8 @@ module.exports = Backbone.Model.extend({
    * @private
    */
   store(clb) {
+
+
     var sm = this.get('StorageManager');
     var store = {};
     if(!sm)
@@ -442,7 +539,7 @@ module.exports = Backbone.Model.extend({
    * @private
    */
   load(clb) {
-    var result = this.getCacheLoad(1);
+    var result = this.getCacheLoad(1, clb);
     this.get('storables').forEach(m => {
       m.load(result);
     });
@@ -452,10 +549,11 @@ module.exports = Backbone.Model.extend({
   /**
    * Returns cached load
    * @param {Boolean} force Force to reload
+   * @param {Function} clb Callback function
    * @return {Object}
    * @private
    */
-  getCacheLoad(force) {
+  getCacheLoad(force, clb) {
     var f = force ? 1 : 0;
     if(this.cacheLoad && !f)
       return this.cacheLoad;
@@ -474,8 +572,10 @@ module.exports = Backbone.Model.extend({
       });
     });
 
-    this.cacheLoad = sm.load(load);
-    this.trigger('storage:load', this.cacheLoad);
+    this.cacheLoad = sm.load(load, (loaded) => {
+      clb && clb(loaded);
+      this.trigger('storage:load', loaded);
+    });
     return this.cacheLoad;
   },
 

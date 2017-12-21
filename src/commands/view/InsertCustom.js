@@ -13,8 +13,8 @@ module.exports = _.extend({}, CreateComponent, {
    * Run method
    * @private
    * */
-  run(em, sender, options) {
-    this.em = em;
+  run(em, sender, options) {    
+    alert('init');
     this.sender = sender;
     this.opt = options || {};
     this.$wr = this.$wrapper;

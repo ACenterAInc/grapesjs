@@ -81,11 +81,13 @@ module.exports = Backbone.View.extend({
     var sortCls = pfx + 'grabbing';
     var emBody = em ? em.get('Canvas').getBody() : '';
     if(active) {
+      em && em.get('Canvas').startAutoscroll();
       body.className += ' ' + sortCls;
       if(em) {
         emBody.className += ' ' + sortCls;
       }
     } else {
+      em && em.get('Canvas').stopAutoscroll();
       body.className = body.className.replace(sortCls, '').trim();
       if(em) {
         emBody.className = emBody.className.replace(sortCls, '').trim();
@@ -231,8 +233,9 @@ module.exports = Backbone.View.extend({
       this.getContainerEl().appendChild(this.plh);
     }
 
-    if(this.eV) {
-      this.eV.className += ' ' + this.freezeClass;
+    if(trg) {
+      var className = trg.getAttribute('class');
+      trg.setAttribute('class', `${className} ${this.freezeClass}`);
       this.$document.on('mouseup', this.endMove);
     }
 
@@ -428,10 +431,15 @@ module.exports = Backbone.View.extend({
 
     if (this.canvasRelative && this.em) {
       var pos = this.em.get('Canvas').getElementPos(el);
-      top = pos.top;
-      left = pos.left;
-      height = pos.height;
-      width = pos.width;
+      var styles = window.getComputedStyle(el);
+      var marginTop = parseFloat(styles['marginTop']);
+      var marginBottom = parseFloat(styles['marginBottom']);
+      var marginRight = parseFloat(styles['marginRight']);
+      var marginLeft = parseFloat(styles['marginLeft']);
+      top = pos.top - marginTop;
+      left = pos.left - marginLeft;
+      height = pos.height + marginTop + marginBottom;
+      width = pos.width + marginLeft + marginRight;
     } else {
       var o = this.offset(el);
       top = this.relative ? el.offsetTop : o.top - (this.wmargin ? -1 : 1) * this.elT;
@@ -623,10 +631,15 @@ module.exports = Backbone.View.extend({
     this.$document.off('keydown', this.rollback);
     this.plh.style.display = 'none';
     var clsReg = new RegExp('(?:^|\\s)'+this.freezeClass+'(?!\\S)', 'gi');
-    if(this.eV)
-      this.eV.className = this.eV.className.replace(clsReg, '');
+    let trg = this.eV;
+
+    if (trg) {
+      var className = (trg.getAttribute('class')+'').replace(clsReg, '');
+      trg.setAttribute('class', className);
+    }
+
     if(this.moved)
-      created = this.move(this.target, this.eV, this.lastPos);
+      created = this.move(this.target, trg, this.lastPos);
     if(this.plh)
       this.plh.style.display = 'none';
 
@@ -656,7 +669,14 @@ module.exports = Backbone.View.extend({
     var model = $(src).data('model');
     var $dst = $(dst);
     var targetModel;
-
+/*
+    alert('a');
+    try {
+      sdfs()
+    } catch (z) {
+      console.error(z.stack);
+    }
+    */
     while ($dst.length && !targetModel) {
       targetModel = $dst.data('model');
       dst = $dst.get(0);
@@ -669,6 +689,8 @@ module.exports = Backbone.View.extend({
     }
 
     var targetCollection = $dst.data('collection');
+    //console.error("SLKDFJSLDKFJLSDFJLKS");console.error("SLKDFJSLDKFJLSDFJLKS");console.error("SLKDFJSLDKFJLSDFJLKS");console.error("SLKDFJSLDKFJLSDFJLKS");
+    //console.error(targetCollection);
     // Check if the elemenet is DRAGGABLE to the target
     var drag = model && model.get('draggable');
     var draggable = typeof drag !== 'undefined' ? drag : 1;
@@ -718,6 +740,9 @@ module.exports = Backbone.View.extend({
         modelToDrop = this.dropContent;
         opts.silent = false;
       }
+
+      //console.error("aaADDING OF");
+      //console.error(modelToDrop)
       created = targetCollection.add(modelToDrop, opts);
       if(!this.dropContent){
         targetCollection.remove(modelTemp);
@@ -745,6 +770,9 @@ module.exports = Backbone.View.extend({
     if (em)
       em.trigger('component:dragEnd', targetCollection, modelToDrop, warns);
 
+//console.error("WTF");
+//console.error("WTF");console.error("WTF");console.error("WTF");console.error("WTF");console.error("WTF");
+//      console.error(created);
     return created;
   },
 

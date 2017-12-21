@@ -70,6 +70,8 @@ module.exports = Backbone.Model.extend({
     // Component's javascript
     script: '',
 
+    created: 0,
+
     // Traits
     traits: ['id', 'title'],
 
@@ -100,19 +102,31 @@ module.exports = Backbone.Model.extend({
     this.sm = opt ? opt.sm || {} : {};
     this.config = o || {};
     this.defaultC = this.config.components || [];
+    this.defaultH = this.config.heads || [];
     this.defaultCl = this.normalizeClasses(this.get('classes') || this.config.classes || []);
     this.components	= new Components(this.defaultC, opt);
     this.components.parent = this;
+
+    this.heads	= new Components(this.defaultH, opt);
+    this.heads.parent = this;
+
     this.listenTo(this, 'change:script', this.scriptUpdated);
     this.set('attributes', this.get('attributes') || {});
     this.set('components', this.components);
+    this.set('heads', this.heads);
     this.set('classes', new Selectors(this.defaultCl));
     var traits = new Traits();
     traits.setTarget(this);
     traits.add(this.get('traits'));
     this.set('traits', traits);
     this.initToolbar();
-
+/*
+    if (window.editorInitialized) {
+      this.set('created',0);
+    } else {
+      this.set('created',1);
+    }
+*/
     // Normalize few properties from strings to arrays
     var toNormalize = ['stylable'];
     toNormalize.forEach(function(name) {
@@ -124,6 +138,7 @@ module.exports = Backbone.Model.extend({
       }
     }, this);
 
+    this.set('status', '');
     this.init();
   },
 
@@ -260,6 +275,10 @@ module.exports = Backbone.Model.extend({
     return this.name;
   },
 
+  getCurrentName() {
+    return this.get('custom-name') || this.getName();
+  },
+
   /**
    * Return HTML string of the component
    * @param {Object} opts Options
@@ -282,15 +301,116 @@ module.exports = Backbone.Model.extend({
     }
     // Build the string of classes
     var strCls = '';
+    var isFound = false;
+    /*var tmpCls =  "afaf_" +m.cid;
+    if (!(window.preventUpdates === undefined)) { //} && window.preventUpdates == false) {
+      tmpCls =  "g_" + editor.md5prefix + "_" + tmpCls;
+    }
+    */
     m.get('classes').each(m => {
-      strCls += ' ' + m.get('name');
-    });
-    strCls = strCls !== '' ? ' class="' + strCls.trim() + '"' : '';
 
+      //TODO: Fix this..
+      // console.error("TEST WINDOW EDITOR");
+      // console.error(window.editorInitialized);
+      /*
+      if (!(window.preventUpdates === undefined)) { //} && window.preventUpdates == false) {
+        if (window.editorInitialized == true) {
+            //strCls += ' g_' + m.get('name');
+            strCls +=  "g_" + editor.md5prefix + "_" + m.get('name');
+        } else {
+          strCls += ' ' + m.get('name');
+        }
+      } else {
+        strCls += ' ' + m.get('name');
+      }
+      */
+
+      //if (window.components_ori_hash === undefined || window.components_ori_hash.hasOwnProperty(m.cid)) {
+        //alert(m.get('name') + " vs " + m.cid);
+        //// console.error("slkfdjskdlfjkls");// console.error("slkfdjskdlfjkls");// console.error("slkfdjskdlfjkls");// console.error("slkfdjskdlfjkls");// console.error("slkfdjskdlfjkls");
+        //// console.error(m);
+
+        /*if (m.get('name') == m.id) {
+          if (window.preventUpdates === undefined) { //} && window.preventUpdates == false) {
+            strCls += 'gen_' + editor.md5prefix + "_" + m.get('name');
+          } else {
+            strCls += 'g_' + editor.md5prefix + "_" + m.get('name');
+          }
+        } else {
+          strCls += ' ' + m.get('name');
+        }*/
+        // console.error("TNAMEMEMEME");
+        // console.error("TNAMEMEMEME");
+        // console.error("TNAMEMEMEME");
+        // console.error("TNAMEMEMEME");
+        // console.error("TNAMEMEMEME" + m.get('name'));
+        strCls += ' ' + m.get('name');
+
+      //} else {
+      //  strCls += ' g_' + editor.md5prefix + "_" + m.get('name');
+      //}
+
+
+      if (window.editor !== undefined) {
+        if (window.preventUpdates === undefined) { //} && window.preventUpdates == false) {
+          if (m.get('name') == 'gen_' + window.editor.md5prefix + "_" + m.id) {
+             isFound=true;
+          }
+        } else {
+          if (m.get('name') == 'g_' + window.editor.md5prefix + "_" + m.id) {
+             isFound=true;
+          }
+            //if (m.get('name') == 'g_' + editor.md5prefix + "_" + m.cid) {
+            //   isFound=true;
+            //}
+        }
+      }
+    });
+    if (!isFound) {
+       if (window.preventUpdates === undefined) { //window.preventUpdates == false) {
+         if (window.editor !== undefined) {
+           //strCls += ' ' + 'gen_' + window.editor.md5prefix + "_" + m.id;
+         }
+       } else {
+         if (window.preventUpdates === undefined) { //window.preventUpdates == false) {
+           if (window.editor !== undefined) {
+             //strCls += ' ' + 'g_' + window.editor.md5prefix + "_" + m.id;
+           }
+         }
+       }
+    }
+
+    /*
     // If style is not empty I need an ID attached to the component
     // TODO: need to refactor in case of 'ID Trait'
-    if(!_.isEmpty(m.get('style')))
-      attrId = ' id="' + m.cid + '" ';
+    if(!_.isEmpty(m.get('style'))) {
+      //attrId = ' id="' + m.cid + '" ';
+      attrId = ' cid="' + m.cid + '" ';
+    }
+    */
+    if(!_.isEmpty(m.get('style'))) {
+      //no classes.. so we force create one..
+      if (window.editor !== undefined) {
+        strCls += ' gId_' + window.editor.md5prefix + "-" + m.cid;
+        //attrId = ' cid="' + m.cid + '" ';
+      }
+    }
+
+    strCls = strCls !== '' ? ' class="' + strCls.trim() + '"' : '';
+
+
+
+
+
+
+    if(_.isEmpty(m.get('attributes')['custom-name'])) {
+      //attrId = ' id="' + m.cid + '" ';
+      if (window.preventUpdates === undefined) {//} && window.preventUpdates == false) {
+        if (window.editor !== undefined) {
+          attrId += ' custom-name="' + m.getName() + "_" + window.editor.md5prefix + "-" + m.cid + '" ';
+        }
+      }
+    }
 
     code += '<' + tag + strCls + attrId + strAttr + (sTag ? '/' : '') + '>' + m.get('content');
 

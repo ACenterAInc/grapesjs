@@ -38,6 +38,7 @@ module.exports = _.extend({}, SelectPosition, {
     };
     this.isDragged = false;
     this.tempComponent = {style: {}};
+
     this.beforeDraw(this.tempComponent);
     this.updateSize(this.startPos.top, this.startPos.left, 0, 0);
     this.toggleEvents(1);
@@ -98,7 +99,7 @@ module.exports = _.extend({}, SelectPosition, {
   create(target, component, index, method, opts) {
     index = method === 'after' ? index + 1 : index;
     var opt = opts || {};
-    var $trg = $(target);
+    var $trg = $(target);    
     var trgModel = $trg.data('model');
     var trgCollection = $trg.data('collection');
     var droppable = trgModel ? trgModel.get('droppable') : 1;

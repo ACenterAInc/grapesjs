@@ -76,7 +76,12 @@ module.exports = Backbone.View.extend({
     e.stopPropagation();
     var inputName = this.getInputName();
     inputName.readOnly = true;
+
     this.model.set(this.customNameProp, inputName.value);
+
+    var attrs = _.clone(this.model.get('attributes'));
+    attrs['custom-name'] = inputName.value;
+    this.model.set('attributes', attrs);
   },
 
   /**
@@ -269,8 +274,10 @@ module.exports = Backbone.View.extend({
     var vis = this.isVisible();
     var count = this.countChildren(this.model);
 
+    var attr = this.model.get('attributes');
+
     this.$el.html( this.template({
-      title: this.model.get(this.customNameProp) || this.model.getName(),
+      title: this.model.get(this.customNameProp) || attr[this.customNameProp]|| this.model.getName()+"-" + this.model.cid,
       addClass: (count ? '' : pfx+'no-chld'),
       editBtnCls: this.editBtnCls,
       inputNameCls: this.inputNameCls,

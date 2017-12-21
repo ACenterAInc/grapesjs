@@ -56,7 +56,7 @@ module.exports = {
         });
 
         it('Has expected name 2', () => {
-          obj.cid = 'c999';
+          obj.cid = editor.md5prefix + '999';
           obj.set('type','testType');
           expect(obj.getName()).toEqual('TestType');
         });

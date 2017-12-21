@@ -6,6 +6,7 @@ var osm = 'open-sm';
 var otm = 'open-tm';
 var ola = 'open-layers';
 var obl = 'open-blocks';
+var lstpages = 'list-pages';
 var ful = 'fullscreen';
 var prv = 'preview';
 
@@ -66,7 +67,16 @@ module.exports = {
       className: 'fa fa-th-large',
       command: obl,
       attributes  : { title: 'Open Blocks' },
-    }],
+    },
+    /*
+    {
+      id: lstpages,
+      className: 'fa fa-list-ul',
+      command: lstpages,
+      attributes  : { title: 'Pages' },
+    }
+    */
+    ],
   }],
 
   // Editor model

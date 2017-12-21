@@ -1,14 +1,37 @@
+.fullwidth {
+  width: 100%!important;
+}
+
 .#{$cv-prefix}canvas {
   background-color: rgba(0, 0, 0, 0.15);
   box-sizing: border-box;
   position: absolute;
+  //width: (100% - $leftWidth - $leftWidth);
   width: (100% - $leftWidth);
   height: 100%;
   bottom: 0;
+  //left: $leftWidth;
   left: 0;
   overflow: hidden;
   padding-top: 40px;
   z-index: 1;
+
+  > iframe.whitebg {
+    background-color:white;
+  }
+
+  > iframe.whitebg.topborder {
+    border-top: 2px solid;
+  }
+
+  > iframe.half {
+    height: 50%;
+    outline: medium none;
+    width: 100%;
+    border: none;
+    margin: 0 auto;
+    display: block;
+  }
 
   > iframe {
     height: 100%;

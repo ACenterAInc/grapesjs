@@ -20,6 +20,12 @@ module.exports = {
         devicePanel.set('appendContent', dvm.render()).trigger('change:appendContent');
       }
 
+      var hvm = em.HugoManager;
+      if(hvm){
+        var hugoPanel = panels.addPanel({ id: 'hugo-c'});
+        hugoPanel.set('appendContent', hvm.render()).trigger('change:appendContent');
+      }
+
       // Class Manager container
       var clm = em.SelectorManager;
       if(clm)

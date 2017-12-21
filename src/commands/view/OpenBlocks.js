@@ -6,7 +6,7 @@ module.exports = {
     var bm = editor.BlockManager;
     var panelC;
     if(!this.blocks){
-      this.blocks = $('<div/>').get(0);
+      this.blocks = $('<div class="page-block-selection"/>').get(0);
       this.blocks.appendChild(bm.render());
       var panels = editor.Panels;
       if(!panels.getPanel('views-container'))

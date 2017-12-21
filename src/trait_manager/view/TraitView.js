@@ -17,7 +17,13 @@ module.exports = Backbone.View.extend({
     this.fieldClass = this.ppfx + 'field ' + this.ppfx + 'field-' + md.get('type');
     this.inputhClass = this.ppfx + 'input-holder';
     md.off('change:value', this.onValueChange);
-    this.listenTo(md, 'change:value', this.onValueChange);
+
+    var label = this.getLabel();
+    if (label == 'CId') { // cid 'c999' cid =  id =
+
+    } else {
+      this.listenTo(md, 'change:value', this.onValueChange);
+    }
     this.tmpl = '<div class="' + this.fieldClass +'"><div class="' + this.inputhClass +'"></div></div>';
   },
 
@@ -68,7 +74,11 @@ module.exports = Backbone.View.extend({
   getLabel() {
     var model = this.model;
     var label = model.get('label') || model.get('name');
-    return label.charAt(0).toUpperCase() + label.slice(1).replace(/-/g,' ');
+    var labelN = label.charAt(0).toUpperCase() + label.slice(1).replace(/-/g,' ');
+    if (labelN == 'Id') {
+      return 'CId';
+    }
+    return labelN;
   },
 
   /**
@@ -85,6 +95,13 @@ module.exports = Backbone.View.extend({
         placeholder: md.get('placeholder') || md.get('default'),
         type: md.get('type') || 'text'
       };
+
+      var label = this.getLabel();
+      if (label == 'CId') {
+        opts['readonly']=true;
+        opts['placeholder']= this.target.get('attributes')['custom-name'] || md.cid;
+      }
+
       if(md.get('changeProp')){
         opts.value = trg.get(name);
       }else{
@@ -124,6 +141,9 @@ module.exports = Backbone.View.extend({
     if(!this.$input){
       this.$el.append(this.tmpl);
       var el = this.getInputEl();
+
+
+
       this.$el.find('.' + this.inputhClass).prepend(el);
     }
   },
@@ -131,6 +151,7 @@ module.exports = Backbone.View.extend({
   render() {
     this.renderLabel();
     this.renderField();
+
     this.el.className = this.className;
     return this;
   },

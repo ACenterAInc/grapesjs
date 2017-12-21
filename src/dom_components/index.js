@@ -82,6 +82,11 @@ module.exports = () => {
       view: require('./view/ComponentScriptView'),
     },
     {
+      id: 'svg',
+      model: require('./model/ComponentSvg'),
+      view: require('./view/ComponentSvgView'),
+    },
+    {
       id: 'textnode',
       model: require('./model/ComponentTextNode'),
       view: require('./view/ComponentTextNodeView'),
@@ -215,8 +220,27 @@ module.exports = () => {
       }else if(d.html)
         obj = d.html;
 
-      if(obj)
+      //TODO: Only get the body section
+      if(obj) {
         this.getComponents().reset(obj);
+      }
+
+      var headObj = '';
+      if(d.heads){
+        try{
+          headObj =  JSON.parse(d.heads);
+        }catch(err){}
+
+        if(headObj) {
+          this.getComponents().reset(headObj);
+        }
+      }else if(d.html)
+        headObj = d.html;
+      //TODO: Only get the Head obj..
+
+
+
+
       return obj;
     },
 
@@ -262,6 +286,10 @@ module.exports = () => {
       return this.getComponent();
     },
 
+    getHeadWrapper() {
+      return this.getHeadComponent();
+    },
+
     /**
      * Returns wrapper's children collection. Once you have the collection you can
      * add other Components(Models) inside. Each component can have several nested
@@ -293,6 +321,21 @@ module.exports = () => {
       return this.getWrapper().get('components');
     },
 
+    getHeadComponents() {
+      return this.getWrapper().get('heads');
+    },
+
+    getComponentsOrig() {
+      window.components_ori = window.components_ori || [];
+      window.components_ori_hash = window.components_ori_hash || {};
+      return window.components_ori;
+    },
+
+    getHeadComponentsOrig() {
+      window.head_components_ori = window.chead_omponents_ori || [];
+      window.head_components_ori_hash = window.head_components_ori_hash || {};
+      return window.head_components_ori;
+    },
     /**
      * Add new components to the wrapper's children. It's the same
      * as 'domComponents.getComponents().add(...)'
@@ -325,6 +368,68 @@ module.exports = () => {
       return this.getComponents().add(component);
     },
 
+    addHeadComponent(head) {
+      return this.getHeadComponents().add(head);
+    },
+
+    setComponentOrig(component) {
+      console.error("SET COMONENT ORIG TATE")
+      console.error(component)
+      var cc = this.getComponentsOrig();
+      var commpOrigHash = window.components_ori_hash;
+      console.error("GOT CC");
+      console.error(this.getComponents());
+      var comps = this.getComponents();
+      var len = comps.length
+      for (var i =0 ; i < len; i++) {
+         var cmp = comps.models[i];
+
+        var clonedObj = JSON.parse(JSON.stringify(cmp))
+        clonedObj.cid = cmp.cid;
+        components_ori_hash[cmp.cid] = clonedObj;
+         //var clonedObj = cloneDeep(cmp);
+         /*clonedObj.forEach(function(el){
+           // console.log("REMOVING");
+           el.remove()}
+         );*/
+         cc.push(clonedObj);
+      }
+    },
+
+    setHeadComponentOrig(component) {
+      console.error("SET COMONENT ORIG TATE")
+      console.error(component)
+      var cc = this.getHeadComponentsOrig();
+      var commpOrigHash = window.head_components_ori_hash;
+      console.error("GOT CC");
+      console.error(this.getHeadComponents());
+      var comps = this.getHeadComponents();
+      var len = comps.length
+      for (var i =0 ; i < len; i++) {
+         var cmp = comps.models[i];
+
+        var clonedObj = JSON.parse(JSON.stringify(cmp))
+        clonedObj.cid = cmp.cid;
+        head_components_ori_hash[cmp.cid] = clonedObj;
+         //var clonedObj = cloneDeep(cmp);
+         /*clonedObj.forEach(function(el){
+           // console.log("REMOVING");
+           el.remove()}
+         );*/
+         cc.push(clonedObj);
+      }
+
+      /*var headTgt = $("iframe").contents().find("head")[0];
+      var nodes = $.parseHTML( editor.getHead() );
+      var nodeLen = nodes.length;
+      for (var w = 0; w < nodeLen; w++) {
+           headTgt.appendChild(nodes[w]);
+      }*/
+
+    },
+
+
+
     /**
      * Render and returns wrapper element with all components inside.
      * Once the wrapper is rendered, and it's what happens when you init the editor,
@@ -333,7 +438,14 @@ module.exports = () => {
      * @return {HTMLElement}
      */
     render() {
-      return componentView.render().el;
+
+      var renderedElements = componentView.render().el;
+      //TODO: Insert it in the renderedElement object ??
+      setTimeout(function() {
+        $("iframe").contents().find("head").append(window.editor.getHead());
+      }, 500);
+
+      return renderedElements;
     },
 
     /**
@@ -347,6 +459,20 @@ module.exports = () => {
       return this;
     },
 
+    clearHead() {
+      var c = this.getHeadComponents();
+      for(var i = 0, len = c.length; i < len; i++)
+        c.pop();
+      return this;
+    },
+
+    /*clearOrig() {
+      var c = this.getComponents();
+      for(var i = 0, len = c.length; i < len; i++)
+        c.pop();
+      return this;
+    },*/
+
     /**
      * Set components
      * @param {Object|string} components HTML string or components model
@@ -356,6 +482,22 @@ module.exports = () => {
     setComponents(components) {
       this.clear().addComponent(components);
     },
+
+    /**
+     * Set components
+     * @param {Object|string} components HTML string or components model
+     * @return {this}
+     * @private
+     */
+    setHeadComponents(components) {
+      this.clearHead().addHeadComponent(components);
+    },
+
+
+    /*setComponentsOrig(components) {
+      //this.addComponentOrig(components);
+    },*/
+
 
     /**
      * Add new component type

@@ -185,6 +185,11 @@ module.exports = () => {
      * @return {HTMLElement}
      */
     render() {
+      try {
+        csdlkfjlskdfja();
+      } catch(wz) {
+        console.error(wz.stack);
+      }
       return PanelsViewObj.render().el;
     },
 
@@ -193,9 +198,14 @@ module.exports = () => {
      * @private
      */
     active() {
+      console.log('activatate panenel buttons')
       this.getPanels().each(p => {
+          console.log('activatate panenel a')
           p.get('buttons').each(btn => {
+            console.log('activate oof ...')
+            console.log(btn)
             if(btn.get('active'))
+              console.log('activate YESS ...')
               btn.trigger('updateActive');
           });
         });

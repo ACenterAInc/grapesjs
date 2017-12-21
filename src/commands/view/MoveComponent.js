@@ -15,6 +15,7 @@ module.exports = _.extend({}, SelectPosition, SelectComponent, {
 
   enable(...args) {
     SelectComponent.enable.apply(this, args);
+    //console.error("MOV COMPONETNE TEST ")
     this.getBadgeEl().addClass(this.badgeClass);
     this.getHighlighterEl().addClass(this.hoverClass);
     var wp = this.$wrapper;

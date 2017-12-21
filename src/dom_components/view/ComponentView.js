@@ -25,7 +25,7 @@ module.exports = Backbone.View.extend({
     this.components = model.get('components');
     this.attr = model.get("attributes");
     this.classe = this.attr.class || [];
-    this.listenTo(model, 'destroy remove', this.remove);
+    this.listenTo(model, 'destroy remove', this.removeTmp);
     this.listenTo(model, 'change:style', this.updateStyle);
     this.listenTo(model, 'change:attributes', this.updateAttributes);
     this.listenTo(model, 'change:status', this.updateStatus);
@@ -43,6 +43,10 @@ module.exports = Backbone.View.extend({
     this.init();
   },
 
+  removeTmp: function() {
+    //alert('got removed obj');
+    this.remove();
+  },
   /**
    * Initialize callback
    */
@@ -104,7 +108,37 @@ module.exports = Backbone.View.extend({
         pfx = this.pfx;
     switch(s) {
         case 'selected':
-          this.$el.addClass(pfx + 'selected');
+          console.log('selected of a')
+          console.log(this.$el)
+          console.log(this.model)
+
+          console.log("MOUSE OVER");
+          var isValid = true;
+          if (window.editor.getConfig().tagEditorOnly) {
+            console.log('selected of b')
+            console.log('selected of d')
+            console.log(this);
+            //if (!(this.attr.hasOwnProperty('data-param')('data-highlightable') >= 0)) {
+            console.log(this.$el);
+            if (!(this.$el.attr('data-highlightable') >= 0)) {
+              isValid = false;
+            }
+          }
+
+          if (isValid) {
+            // only allow selection if tagEditor restriction then validate its highlitable ...
+            console.log("IS VALID YEAH...");
+            this.$el.addClass(pfx + 'selected');
+          } else {
+            console.log('not sel');
+          }
+          console.log('TEST SEL')
+
+          console.log('CLOSES PARTIAL IS')
+          console.log($($("#editorIframe").contents().find(".gjs-comp-selected").closest("[partial]")).attr('partial'))
+          console.log('DATA PARAM IS')
+          console.log($($("#editorIframe").contents().find(".gjs-comp-selected").closest("[data-param]")).attr('data-param'))
+
             break;
         case 'moving':
             break;
@@ -146,8 +180,47 @@ module.exports = Backbone.View.extend({
     if(model.get('src'))
       attributes.src = model.get('src');
 
-    if(model.get('highlightable'))
-      attributes['data-highlightable'] = 1;
+
+    if(model.get('highlightable')) {
+      console.error("TEST EDIT ONLY")
+      console.error(window.editor.getConfig().tagEditorOnly);
+      if (window.editor.getConfig().tagEditorOnly) {
+        console.log('test highlight of')
+        if (this.$el.length > 0) {
+          try {
+            //Mark highlightable only if has data-param
+            if (this.attr.hasOwnProperty('partial')) {
+              attributes['data-highlightable'] = 0;
+              model.set('editable', true)
+              model.set('highlightable', true);//default value
+              model.set('draggable',false);
+              model.set('resizable',false);
+              model.set('removable',false);
+              model.set('copyable',false);
+              model.set('badgable',false);
+
+            } else if (this.attr.hasOwnProperty('data-param')) {
+              attributes['data-highlightable'] = 1;
+              model.set('editable', true);
+              model.set('highlightable', true);//default value
+              model.set('draggable',false);
+              model.set('resizable',false);
+              model.set('removable',false);
+              model.set('copyable',false);
+              model.set('badgable',false);
+            } else {
+              model.set('editable', false);
+              model.set('highlightable', false);
+            }
+          } catch (eea) {
+
+          }
+        }
+      } else {
+        //mark all items highlitable defualt behavior
+        attributes['data-highlightable'] = 1;
+      }
+    }
 
     var styleStr = this.getStyleString();
 
@@ -215,6 +288,15 @@ module.exports = Backbone.View.extend({
    * Init component for resizing
    */
   initResize() {
+    /*
+    console.log('INIT RESIZE HERE A');
+    console.log(this);
+    console.log(this.model);
+    console.log(this.model.get('highlightable'));*/
+    if (!this.model.get('highlightable')) {
+        return;
+    }
+
     var em = this.opts.config.em;
     var editor = em ? em.get('Editor') : '';
     var config = em ? em.get('Config') : '';
@@ -290,6 +372,10 @@ module.exports = Backbone.View.extend({
    * @private
    */
   updateScript() {
+    if (!this.model.get('script')) {
+      return;
+    }
+
     var em = this.em;
     if(em) {
       var canvas = em.get('Canvas');
@@ -382,12 +468,7 @@ module.exports = Backbone.View.extend({
     var container = this.getChildrenContainer();
     container.innerHTML = model.get('content');
     this.renderChildren();
-
-    // Render script
-    if(model.get('script')) {
-      this.updateScript();
-    }
-
+    this.updateScript();
     return this;
   },
 

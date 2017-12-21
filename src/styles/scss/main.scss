@@ -4,6 +4,7 @@
 @import "node_modules/codemirror/lib/codemirror";
 @import "node_modules/codemirror/theme/hopscotch";
 
+
 $app-prefix: 	'gjs-';
 $nv-prefix: 	$app-prefix + 'nv-';
 $rte-prefix: 	$app-prefix + 'rte-';
@@ -23,6 +24,9 @@ $mainColor:		#444; /* Light: #573454 Dark: #3b2639 -moz-linear-gradient(top, #fc
 $fontColor:   #ddd; /* l: #d8d7db */
 $fontColorActive: #f8f8f8;
 
+.hidden {
+  display: none!important;
+}
 /* Light theme
 $mainColor: #fff;
 $fontColor: #9299a3;
@@ -310,6 +314,10 @@ div.#{$app-prefix}select {
     width: 70%;
   }
 }
+
+/*************  LEFTMENU  ****************/
+
+@import "gjs_leftmenu";
 
 /*************  CANVAS  ****************/
 
@@ -711,6 +719,45 @@ $lightBorder: rgba(255, 255, 255, 0.05);
 
 /********* END Device Manager **********/
 
+/********* hugoManager  **********/
+
+##{$app-prefix}pn-hugo-c{
+  margin-left: 30%;
+}
+
+.#{$app-prefix}hugo-c{
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  //left: 40%;
+
+  /*
+  padding: 10px 5px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  margin-bottom: 10px;
+  */
+
+  .#{$app-prefix}hugo-label {
+    flex-grow: 2;
+    font-size: 0.7em;
+    text-align: left;
+    margin-right: 10px;
+  }
+
+  .#{$app-prefix}button{
+    flex-grow: 20;
+  }
+
+  .#{$app-prefix}add-trasp{
+    flex-grow: 1;
+    margin-left: 5px;
+    min-width: 200px;
+    padding: 1;
+    background:green;
+  }
+}
+
+/********* END hugoManager Manager **********/
 
 /********* General **********/
 
@@ -1234,6 +1281,88 @@ $paddElClm: 5px 6px;
   display:block;
   margin-bottom:10px;
 }
+
+
+/********* File  Manager **********/
+
+
+
+.#{$am-prefix}files-cont {
+  background-color: $mainDklColor;
+  border-radius: 3px;
+  box-sizing: border-box;
+  padding: 10px;
+  width: 98%;
+  float:left;
+  height: 325px;
+  overflow: hidden;
+
+  ##{$am-prefix}preview-cont{
+    position: relative;
+    height: 70px; width: 30%;
+    background-color: $mainColor;
+    border-radius: 2px;
+    float: left;
+    overflow: hidden;
+  }
+
+  ##{$am-prefix}preview{
+    position: absolute;
+    background-position: center center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    height: 100%;
+    width: 100%;
+    z-index: 1;
+  }
+
+  ##{$am-prefix}preview-bg{
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    @include opacity(0.5);
+    z-index: 0;
+  }
+
+  .#{$am-prefix}highlight {
+    background-color: $mainLhColor;
+  }
+
+  .#{$am-prefix}asset {
+	  border-bottom: 1px solid darken($mainDkColor, 3%);
+	  padding: 5px;
+	  cursor:pointer;
+	  position: relative;
+
+    &:hover ##{$am-prefix}close { display: block;}
+
+	}
+	##{$am-prefix}close {
+		@extend .btn-cl;
+		position: absolute;
+		right: 5px;
+	  	top: 0;
+	  	display: none;
+	}
+
+	##{$am-prefix}meta {
+	  width: 70%;
+	  float: left;
+	  font-size: 12px;
+	  padding: 5px 0 0 5px;
+	  box-sizing: border-box;
+
+	  	> div { margin-bottom: 5px;}
+	  	##{$am-prefix}dimensions {
+		  font-size: 10px;
+		  @include opacity(0.5);
+		}
+	}
+}
+
+
+
+/********* File  Manager **********/
 
 /********* Assets Manager **********/
 .#{$am-prefix}assets {

@@ -16,22 +16,83 @@ module.exports = Backbone.Model.extend({
     var style = model.get('style');
     var classes = model.get('classes');
 
+
     // Let's know what classes I've found
     if(classes) {
       classes.each(function(model){
+        //alert(model.get('name'));
+        /*
+        if (model.get('name') == model.id) {
+          if (window.preventUpdates === undefined) { //window.preventUpdates == false) {
+            this.compCls.push('gen_' + window.editor.md5prefix+"_" +model.id);
+          } else {
+            this.compCls.push('g_' + window.editor.md5prefix+"_" +model.id);
+          }
+        } else {
+          this.compCls.push(model.get('name'));
+        }
+        */
         this.compCls.push(model.get('name'));
       }, this);
     }
 
     if(style && Object.keys(style).length !== 0) {
-      code += '#' + model.cid + '{';
-      for(var prop in style){
-        if(style.hasOwnProperty(prop))
-          code += prop + ':' + style[prop] + ';';
+      //if (window.editor !== undefined) {
+      /*if (window.preventUpdates === undefined) { //window.preventUpdates == false) {
+        code += '.gen_' + window.editor.md5prefix+"_" +model.id + '{';
+        for(var prop in style){
+          if(style.hasOwnProperty(prop))
+            code += prop + ':' + style[prop] + ';';
+        }
+        code += '}';
+      } else {
+        code += '.g_' + window.editor.md5prefix+"_" +model.id + '{';
+        for(var prop in style){
+          if(style.hasOwnProperty(prop))
+            code += prop + ':' + style[prop] + ';';
+        }
+        code += '}';
       }
-      code += '}';
+
+      */
+      //code += ".aaaaaaaaaaaaaaA{}"
+      // console.error("THEKEKJLKS");
+      // console.error(model);
+      if (!(model.get('name') === undefined)) {
+          code += "." + model.get('name') + '{';
+          for(var prop in style){
+            if(style.hasOwnProperty(prop))
+              code += prop + ':' + style[prop] + ';';
+          }
+          code += '}';
+      } else {
+        if (window.editor !== undefined) {
+          code += "." + 'gId_' + window.editor.md5prefix + "-" + model.cid + '{';
+          for(var prop in style){
+            if(style.hasOwnProperty(prop))
+              code += prop + ':' + style[prop] + ';';
+          }
+          code += '}';
+        }
+      }
+      //} else {
+
+      //}
+
+      //} else {
+        /*if (window.editorInitialized) {
+          code += '.g_' + window.editor.md5prefix+"_" +model.cid + '{';
+          for(var prop in style){
+            if(style.hasOwnProperty(prop))
+              code += prop + ':' + style[prop] + ';';
+          }
+          code += '}';
+        }*/
+      //}
     }
 
+    // // console.error("CODE IS");
+    // // console.error(code);
     return code;
   },
 
@@ -117,7 +178,28 @@ module.exports = Backbone.Model.extend({
 
     // Get string of selectors
     selectors.each(selector => {
-      strSel += '.' + selector.get('name');
+      //// console.error("TTT" + '.' + selector.get('name'));
+      // console.error(selector);
+
+      strSel += '.';// + selector.get('name');
+      /*
+      // console.error(selector.attributes.name +" vs" + selector.attributes.name + " and " + selector.id);
+      if (selector.get('name') == selector.id) {
+        if (window.preventUpdates === undefined) { //window.preventUpdates == false) {
+          strSel += 'gen_' + window.editor.md5prefix+"_"+selector.id;
+        } else {
+          //this.compCls.push('g_' + window.editor.md5prefix+"_" +selector.id);
+          strSel += 'g_' + window.editor.md5prefix+"_"+selector.id;
+        }
+      } else {
+        strSel += selector.get('name');  //.c999  cid = id =
+      }
+      */
+      // console.error(selector);
+      // console.error("NAME IS :"+ selector.get('name'));
+      strSel += selector.get('name');  //.c999  cid = id =
+
+
       if(compCls.indexOf(selector.get('name')) > -1)
         found = 1;
     });

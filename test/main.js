@@ -22,4 +22,7 @@ describe('Main', () => {
   require(`${path}parser`);
   require(`${path}plugin_manager`);
   require(`${path}selector_manager`);
+  require(`${path}storage_manager`);
+  require(`${path}style_manager`);
+  require(`${path}trait_manager`);
 });

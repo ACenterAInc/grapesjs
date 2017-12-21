@@ -21,7 +21,7 @@ module.exports = Backbone.Collection.extend({
         model.target = this.target;
         models[i] = model;
       }
-    }
+    }  
     return Backbone.Collection.prototype.add.apply(this, [models, opt]);
   },
 

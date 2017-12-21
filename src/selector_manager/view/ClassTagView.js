@@ -78,14 +78,23 @@ module.exports = Backbone.View.extend({
   removeTag(e) {
     var comp = this.target.get('selectedComponent');
 
-    if(comp)
+    if(comp) {
+      alert('aaaa3');
+      console.error("GET OF CLACCESS.. REMOVE...");
+      console.error(this.model);
       comp.get('classes').remove(this.model);
+    }
 
     if(this.coll){
+      alert('all class remoe?');
       this.coll.remove(this.model);
       this.target.trigger('targetClassRemoved');
     }
 
+    console.error("REMOVE THIS");
+    console.error(this);
+    //alert('rm');
+    //console.error(thsthi;
     this.remove();
   },
 

@@ -1,5 +1,7 @@
 # [GrapesJS](http://grapesjs.com)
 
+# Special thanks to GrapeJS
+
 [![Build Status](https://travis-ci.org/artf/grapesjs.svg?branch=master)](https://travis-ci.org/artf/grapesjs)
 
 <p align="center"><img src="http://grapesjs.com/img/grapesjs-front-page-m.jpg" alt="GrapesJS" width="500" align="center"/></p>
@@ -9,6 +11,7 @@ GrapesJS is a free and open source Web Builder Framework which helps you buildin
 Mainly GrapesJS was designed to be used inside a [CMS] to speed up a creation of dynamic templates. To better understand this concept check the image below
 
 <br/>
+
 <p align="center"><img src="http://grapesjs.com/img/gjs-concept.png" alt="GrapesJS - Style Manager" height="400" align="center"/></p>
 <br/>
 
@@ -171,10 +174,19 @@ The project is sponsored by
 
 ## Support
 
-If you like the project support it with a donation of your choice.
+If you like the project support it with a donation of your choice or become a backer/sponsor via [Open Collective](https://opencollective.com/grapesjs)
 
 [![PayPalMe](http://grapesjs.com/img/ppme.png)](https://paypal.me/grapesjs)
 
+<a href="https://opencollective.com/grapesjs/sponsors/0/website" target="_blank"><img src="https://opencollective.com/grapesjs/sponsors/0/avatar"></a>
+<a href="https://opencollective.com/grapesjs/sponsors/1/website" target="_blank"><img src="https://opencollective.com/grapesjs/sponsors/1/avatar"></a>
+
+<a href="https://opencollective.com/grapesjs/backers/0/website" target="_blank"><img src="https://opencollective.com/grapesjs/backers/0/avatar"></a>
+<a href="https://opencollective.com/grapesjs/backers/1/website" target="_blank"><img src="https://opencollective.com/grapesjs/backers/1/avatar"></a>
+
+## Contributors
+
+- ACenterA Inc.  <francis.lavalliere@acentera.com>
 
 
 
@@ -187,3 +199,9 @@ BSD 3-clause
 [wiki]: <https://github.com/artf/grapesjs/wiki>
 [API-Reference]: <https://github.com/artf/grapesjs/wiki/API-Reference>
 [CMS]: <https://it.wikipedia.org/wiki/Content_management_system>
+
+## TODO:
+
+Hugo:
+   - If getHead has a generator, its not a static file ....
+   - Many more..
