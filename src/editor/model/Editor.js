@@ -25,6 +25,7 @@ require('trait_manager'),
 var Backbone = require('backbone');
 var UndoManager = require('backbone-undo');
 var key = require('keymaster');
+var timedInterval;
 
 module.exports = Backbone.Model.extend({
 
@@ -58,10 +59,23 @@ module.exports = Backbone.Model.extend({
       M.onLoad();
     });
 
+    this.loadOnStart();
     this.initUndoManager();
 
     this.on('change:selectedComponent', this.componentSelected, this);
     this.on('change:changesCount', this.updateBeforeUnload, this);
+  },
+
+  /**
+   * Load on start if it was requested
+   * @private
+   */
+  loadOnStart() {
+    const sm = this.get('StorageManager');
+
+    if (sm && sm.getConfig().autoload) {
+      this.load();
+    }
   },
 
   /**
@@ -84,6 +98,7 @@ module.exports = Backbone.Model.extend({
 
   triggerPreviewMode () {
     try {
+      console.error("TRIGGER PREWVIEW HERE");
       this.get('Editor').updatePreviewContentHugo();
     } catch (ew) {
       // this.get('Editor').testStaticPreviewMode();
@@ -152,28 +167,40 @@ module.exports = Backbone.Model.extend({
    * @private
    */
   listenRule(model) {
-    this.stopListening(model, 'change:style', this.ruleUpdated);
-    this.listenTo(model, 'change:style', this.ruleUpdated);
+    this.stopListening(model, 'change:style', this.componentsUpdated);
+    this.listenTo(model, 'change:style', this.componentsUpdated);
   },
 
   /**
-   * Triggered when rule is updated
+   * Triggered when something in components is changed
    * @param  {Object}  model
    * @param  {Mixed}    val  Value
    * @param  {Object}  opt  Options
    * @private
    * */
-  ruleUpdated(model, val, opt) {
-    var count = this.get('changesCount') + 1,
-        avSt  = opt ? opt.avoidStore : 0;
-    this.set('changesCount', count);
-    var stm = this.get('StorageManager');
-    if(stm.isAutosave() && count < stm.getStepsBeforeSave())
-      return;
+  componentsUpdated(model, val, opt) {
 
-    if(!avSt){
-      this.store();
-    }
+    timedInterval && clearInterval(timedInterval);
+    timedInterval = setTimeout(() => {
+
+      var count = this.get('changesCount') + 1;
+      var avoidStore = opt ? opt.avoidStore : 0;
+      var stm = this.get('StorageManager');
+      this.set('changesCount', count);
+
+
+      if (model != undefined)  {
+          model.set('changesCount', updatedCount);
+      }
+
+      if (!stm.isAutosave() || count < stm.getStepsBeforeSave()) {
+        return;
+      }
+
+      if (!avoidStore) {
+        this.store();
+      }
+    }, 0);
   },
 
   /**
@@ -235,13 +262,14 @@ module.exports = Backbone.Model.extend({
     }
   },
 
+  // <<<<<<< HEAD
   /**
    * Triggered when components are updated
    * @param  {Object}  model
    * @param  {Mixed}    val  Value
    * @param  {Object}  opt  Options
    * @private
-   * */
+
   componentsUpdated(model, val, opt) {
     var updatedCount = this.get('changesCount') + 1,
         avSt  = opt ? opt.avoidStore : 0;
@@ -266,6 +294,7 @@ module.exports = Backbone.Model.extend({
       this.store();
     }
   },
+  */
 
   /**
    * Callback on component selection
@@ -293,6 +322,7 @@ module.exports = Backbone.Model.extend({
         classes  = model.get('classes'),
         avSt  = opt ? opt.avoidStore : 0;
 
+    // console.error('udate cpomponent?');
     // Observe component with Undo Manager
     if(this.um)
       this.um.register(comps);
@@ -316,20 +346,14 @@ module.exports = Backbone.Model.extend({
       //this.set('createdComponent',0);
       //this.set('updatedCount',0);
 
-
-      if (window.editorInitialized !== undefined) {
-        console.log("BB");
-        if (window.editorInitialized == true) {
-          console.log("EE");
-          try {
-            jflsdjf();
-          } catch(ew) {
-            console.error(ew.stack);
-          }
-          model.set('createdComponent',1);
-          model.set('updatedCount',1);
-        }
+    console.error('component updated a');
+    console.error('component test : ' +window.editorInitialized);
+    if (window.editorInitialized !== undefined) {
+      if (window.editorInitialized == true) {
+        model.set('createdComponent',1);
+        model.set('updatedCount',1);
       }
+    }
 
   },
 
@@ -525,9 +549,11 @@ module.exports = Backbone.Model.extend({
         store[el] = obj[el];
     });
 
-    sm.store(store, clb);
+    sm.store(store, () => {
+      clb && clb();
+      this.trigger('storage:store', store);
+    });
     this.set('changesCount', 0);
-    this.trigger('storage:store', store);
 
     return store;
   },

@@ -46,6 +46,7 @@ module.exports = Component.extend({
   getAttrToHTML(...args) {
     var attr = Component.prototype.getAttrToHTML.apply(this, args);
     delete attr.onmousedown;
+    
     var src = this.get('src');
     if(src)
       attr.src = src;

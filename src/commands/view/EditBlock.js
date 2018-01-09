@@ -40,7 +40,7 @@ module.exports = {
     var created = function() {
       editor.DomComponents.setComponentOrig(editor.DomComponents.getComponents());
       editor.DomComponents.setHeadComponentOrig(editor.DomComponents.getHeadComponents());
-      window.editorInitialized=true;
+      window.editorInitialized=true;    
     };
     var dragEl = sorter.setDragHelper(this.el, { button:0, pageX:0, pageY:0, target: tgt });
     console.error(dragEl);

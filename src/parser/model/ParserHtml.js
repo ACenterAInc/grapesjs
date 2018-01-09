@@ -60,7 +60,7 @@ module.exports = config => {
     parseNode(el) {
       var result = [];
       var nodes = el.childNodes;
-
+      //console.log('parsing node...');
       for (var i = 0, len = nodes.length; i < len; i++) {
         var node = nodes[i];
         var model = {};
@@ -94,8 +94,13 @@ module.exports = config => {
 
         // console.log(model)
         if (model.tagName === "a") {
+          //console.log('parsing node... set to link');
           model.type="link"
         }
+
+        //if (model.tagName === "p") {
+      //    model.type="text";
+      //  }
         // console.log(model)
 
         if(attrsLen)
@@ -149,11 +154,15 @@ module.exports = config => {
                 model.type = 'text';
               }
               model.content = parsed[0].content;
-            }else
+            }else {
               model.components = parsed;
+            }
           }
         }
 
+        //console.log('model type is:');
+        //console.log(model.type);
+        //console.log(model);
         // Check if it's a text node and if could be moved to the prevous model
         if(model.type == 'textnode'){
           // console.log('PARSED MODEL IS TEXT')

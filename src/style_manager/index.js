@@ -78,6 +78,7 @@ module.exports = () => {
      */
     init(config) {
       c = config || {};
+      // c.sectors = [];
       for (var name in defaults) {
         if (!(name in c))
           c[name] = defaults[name];
@@ -141,6 +142,17 @@ module.exports = () => {
       return sectors;
     },
 
+    clearSectors() {
+      /*
+      console.error(sectors);
+      sectors.each(function(model) {
+          console.error('removeddetroy');
+          model.destroy();
+      });*/
+
+      // this.sectors = [];
+      //var llen = sectors.length;
+    },
     /**
      * Add property to the sector identified by id
      * @param {string} sectorId Sector id

@@ -6,12 +6,17 @@ module.exports = Backbone.View.extend({
     this.pn = this.model.get('Panels');
     this.conf = this.model.config;
     this.className = this.conf.stylePrefix + 'editor';
-    console.log('will set on loaded test  loaded here aa')
     this.model.on('loaded', function(){
       console.log('on loaded here aa')
       this.pn.active();
       this.model.runDefault();
       this.model.trigger('load');
+
+      console.error('COMPONENT GET COMPONENTS DONE');
+      console.error(window.editor.DomComponents.getComponents())
+      window.editor.DomComponents.setComponentOrig(window.editor.DomComponents.getComponents());
+      window.editor.DomComponents.setHeadComponentOrig(window.editor.DomComponents.getHeadComponents());
+      window.editorInitialized=true;
     }, this);
   },
 
@@ -25,12 +30,17 @@ module.exports = Backbone.View.extend({
       if (config.clearOnRender) {
         dComps.clear();
       }
-      // console.error("GOT CONFIG OCMONENTS?");
-      // console.error(config.components);
 
+//<<<<< HEAD FIX HERE
+      dComps.getComponents().reset();//config.components);
+      // console.error('add component here components...');
+      // console.error(config.components);
       dComps.getComponents().add(config.components);
       dComps.getHeadComponents().add(config.headers);
+      model.loadOnStart();
+
       um.clear();
+      // This will init loaded components
       dComps.onLoad();
     }
 

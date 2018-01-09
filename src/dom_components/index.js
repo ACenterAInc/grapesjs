@@ -192,9 +192,6 @@ module.exports = () => {
      * @private
      */
     onLoad() {
-      if(c.stm && c.stm.getConfig().autoload)
-          this.load();
-
       if(c.stm && c.stm.isAutosave()){
         c.em.initUndoManager();
         c.em.initChildrenComp(this.getWrapper());
@@ -209,6 +206,7 @@ module.exports = () => {
      * @return {Object} Loaded data
      */
     load(data) {
+      // alert('aadd components');
       var d = data || '';
       if(!d && c.stm)
         d = c.em.getCacheLoad();
@@ -220,10 +218,13 @@ module.exports = () => {
       }else if(d.html)
         obj = d.html;
 
-      //TODO: Only get the body section
-      if(obj) {
-        this.getComponents().reset(obj);
+      if (obj) {
+        this.clear();
+        this.getComponents().reset();
+        this.getComponents().add(obj);
       }
+
+      // <<<<<<< HEAD
 
       var headObj = '';
       if(d.heads){
@@ -234,12 +235,10 @@ module.exports = () => {
         if(headObj) {
           this.getComponents().reset(headObj);
         }
-      }else if(d.html)
+      }else if(d.html) {
         headObj = d.html;
+      }
       //TODO: Only get the Head obj..
-
-
-
 
       return obj;
     },
@@ -258,8 +257,11 @@ module.exports = () => {
         obj.html = c.em.getHtml();
       if(keys.indexOf('components') >= 0)
         obj.components = JSON.stringify(c.em.getComponents());
-      if(!noStore)
+
+      if (!noStore) {
         c.stm.store(obj);
+      }
+
       return obj;
     },
 
@@ -365,6 +367,8 @@ module.exports = () => {
      * });
      */
     addComponent(component) {
+      console.error('add component here a')
+      console.error(component);
       return this.getComponents().add(component);
     },
 
@@ -373,7 +377,7 @@ module.exports = () => {
     },
 
     setComponentOrig(component) {
-      console.error("SET COMONENT ORIG TATE")
+      console.error("SET COMONENT ORIG TATE AAA")
       console.error(component)
       var cc = this.getComponentsOrig();
       var commpOrigHash = window.components_ori_hash;

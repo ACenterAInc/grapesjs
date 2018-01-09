@@ -20,6 +20,7 @@
  * * [getContainer](#getcontainer)
  * * [refresh](#refresh)
  * * [on](#on)
+ * * [off](#off)
  * * [trigger](#trigger)
  * * [render](#render)
  *
@@ -36,6 +37,8 @@
  * component:update:{propertyName} - Listen any property change
  * component:styleUpdate - Triggered when the style of the component is updated
  * component:styleUpdate:{propertyName} - Listen for a specific style property change
+ * storage:load - Triggered when something was loaded from the storage, loaded object passed as an argumnet
+ * storage:store - Triggered when something is stored to the storage, stored object passed as an argumnet
  * canvasScroll - Triggered when the canvas is scrolled
  * run:{commandName} - Triggered when some command is called to run (eg. editor.runCommand('preview'))
  * stop:{commandName} - Triggered when some command is called to stop (eg. editor.stopCommand('preview'))
@@ -336,6 +339,8 @@ module.exports = config => {
      * });
      */
     addComponents(components) {
+        console.error("ADDING COMPOENNT OF")
+        console.error(components);
       return this.getComponents().add(components);
     },
 
@@ -487,7 +492,7 @@ module.exports = config => {
         try {
         var postData = {
           page: null,
-          html: window.editor.getHtml()
+          html: window.editor.getHtml().replace(/(?:\r\n|\r|\n)/g, '<br />')
         }
 
         $.ajax({
@@ -627,25 +632,37 @@ module.exports = config => {
 
       var len = $("#editorIframe").contents().find('body')[0].appendChild(child);
       */
-      var len = $("#editorIframe").contents().find('body').find("#injectHere").length
+
+      console.error("EDITOR IFRAME TEST");
+      var len = $("#editorIframe").contents().find('body').find("#wrapper").find("#injectHere").length
+      console.error("EDITOR IFRAME TEST 1");
       if (len == 1) {
-        var tmp = $("#editorIframe").contents().find('body').find("#injectHere").detach();
+        console.error("EDITOR IFRAME TEST 2");
+        console.error("GOT INJECT DATA??");
+        console.error($("#editorIframe").contents().find('body').find("#wrapper").find("#injectHere"));
+        var tmp = $("#editorIframe").contents().find('body').find("#wrapper").find("#injectHere").detach();
+        console.error(tmp);
         $("#codeEditIframe").contents().find('body')[0].appendChild(tmp[0]);
+        console.error("INJECTED IS");
         this.injected = tmp[0];
         $("#codeEditIframe").contents().find('body').css({'margin': '0px'});
         $("#codeEditIframe").contents().find('body').find("#injectHere").css({'width': '100%', 'min-height': '100%'});
+        $("#codeEditIframe").contents().find('body').find("#injectHere").show();
+        $("#codeEditIframe").contents().find('body').find("#injectHere").val(window.editor.getConfig().rawHtml);
         var that = this;
+
+        //todo: do a better fix...
+        $("#gjs-pn-views").hide();
 
         //TODO: Set panel mode
         // $("#gjs-pn-views-container").hide();
         // $(".gjs-cv-canvas").addClass('fullwidth');
         $("#codeEditIframe").contents().find('body').find("#injectHere").on('keyup',function(){
-            console.log('key up here');
 
             if(that.qr_timeout != null) {
                 clearTimeout(that.qr_timeout);
             }
-            console.log('key up here 1');
+
             that.qr_timeout = setTimeout(function(){
                  //Do your magic herewindow.editor.editor.updateBeforeUnload()
                  that.editor.updateBeforeUnload()
@@ -654,6 +671,7 @@ module.exports = config => {
 
       }
 
+      this.getConfig().previewIframeVisible = true;
       $("#codeEditIframe").addClass('half').removeClass('hidden')
       $("#editorIframe").addClass('hidden')
       $("#previewIframe").addClass('half').addClass('topborder').addClass('whitebg')
@@ -716,6 +734,16 @@ module.exports = config => {
     },
 
     /**
+     * Detach event
+     * @param  {string} event Event name
+     * @param  {Function} callback Callback function
+     * @return {this}
+     */
+    off(event, callback) {
+      return em.off(event, callback);
+    },
+
+    /**
      * Trigger event
      * @param  {string} event Event to trigger
      * @return {this}
@@ -761,45 +789,115 @@ module.exports = config => {
 
       // this.editor.Canvas.getBody().className = this.ppfx + 'dashed';
       var that1 = this;
-      var fctEnableCanvasEdit = function(newCtr) {
-        if (newCtr  >= 100) {
-          //ah
-        //  console.log('HARD STOP')
-          return
-        }
-        var tmp = $("#editorIframe").contents().find('body');
-        var tmp1 = that1.Canvas;
-        if (tmp.length <= 0) {
-          setTimeout(function() {
-            fctEnableCanvasEdit(++newCtr)
-          }, 300);
-        } else {
-
-
-
-          /*
-          var commands = that.Commands;
-          var commandName = 'sw-visibility';
-          var command;
-
-          if (commands && typeof commandName === 'string') {
-            command  = commands.get(commandName);
-          } else if (commandName !== null && typeof commandName === 'object') {
-            command = commandName;
-          } else if (typeof commandName === 'function') {
-            command = {run: commandName};
+      var fctEnableCanvasHoverAndClick = function(newCtr) {
+        try {
+          if (newCtr  >= 1000) {
+            //hard stop.
           }
 
-          //console.error(command);
-          //this.onDrag({button:0})
-          command.run(that);
-          that.trigger('run:' + commandName);
-          that.refresh();*/
+          console.error("FINDING ELEMMENTS");
+          $("#editorIframe").contents().find('body').find("#wrapper");
+          console.log("A");
+          console.error($("#editorIframe").contents().find('body').find("#wrapper").find('[data-param]'));
+          //if ()
+          console.log("Bs");
+          console.error($("#editorIframe").contents().find('body').find("#wrapper").find('[partial]'));
+          $("#editorIframe").contents().find('body').find("#wrapper").find('[partial]').each(function(idx, ee) {
+              console.error("PROCESSING " + idx);
+              console.error(ee);
 
-          console.log('TIGGER LOADED')
-          that1.editor.trigger('loaded');
-          return;
+              // console.error("TEST");
+              //console.error(ee.attr('component-hash'));
+              var $el = $(ee);
+              console.error($el.attr('component-hash'));
+              if ($el.data('model') === undefined) {
+                  console.error('NO MODEL ?');
+                  if (window.components_hash != null) {
+                    console.error('GOT HASH MODEL ?');
+                    console.error(window.components_hash);
+                    console.error($el.attr('component-hash'));
+                    $el.data('model',window.components_hash[$el.attr('component-hash')]);
+                    console.error($el.data('model'));
+                    if ($el.data('model') !== undefined) {
+                      // $el.addClass('gjs-comp-selected'); <-- add hover? or selectable ??
+                    }
+                  }
+              }
 
+          });
+
+
+        } catch (eff) {
+
+        }
+      };
+      var fctEnableCanvasEdit = function(newCtr) {
+        try {
+          if (newCtr  >= 1000) {
+            //ah
+            console.log('HARD STOP')
+            console.error('AFTER LOADED');
+            // alert('after stop');
+            return
+          }
+          var tmp = $("#editorIframe").contents().find('body').find("#wrapper");//$("#editorIframe").contents().find('body');
+          var tmp1 = that1.Canvas;
+          if (tmp.length <= 0) {
+            setTimeout(function() {
+              fctEnableCanvasEdit(++newCtr)
+            }, 300);
+          } else {
+
+
+            console.error('AFTER LOADED DONE');
+
+            //TODO: Make this better... go and set visible to false on the panel objects...
+            if (window.editor.getConfig().tagEditorOnly) {
+              $("#gjs-pn-views").find(".fa-cog").hide();
+              $("#gjs-pn-views").find(".fa-bars").hide();
+              $("#gjs-pn-views").find(".fa-th-large").hide();
+            }
+
+            // alert('after stop good');
+            /*
+            var commands = that.Commands;
+            var commandName = 'sw-visibility';
+            var command;
+
+            if (commands && typeof commandName === 'string') {
+              command  = commands.get(commandName);
+            } else if (commandName !== null && typeof commandName === 'object') {
+              command = commandName;
+            } else if (typeof commandName === 'function') {
+              command = {run: commandName};
+            }
+
+            //console.error(command);
+            //this.onDrag({button:0})
+            command.run(that);
+            that.trigger('run:' + commandName);
+            that.refresh();*/
+
+            console.log('TIGGER LOADED')
+            that1.editor.trigger('loaded');
+            setTimeout(function() {
+              fctEnableCanvasHoverAndClick(0);
+            }, 2000);
+
+            // var created = function() {
+            /*
+              console.error('COMPONENT GET COMPONENTS');
+              console.error(that1.editor.DomComponents.getComponents())
+              that1.editor.DomComponents.setComponentOrig(that1.editor.DomComponents.getComponents());
+              that1.editor.DomComponents.setHeadComponentOrig(that1.editor.DomComponents.getHeadComponents());
+              window.editorInitialized=true;*/
+            // };
+
+            return;
+
+          }
+        } catch (z) {
+          console.error(z.stack);
         }
       }
       setTimeout(fctEnableCanvasEdit(1), 500);
@@ -837,17 +935,19 @@ module.exports = config => {
       } else if (this.getParameterByName('editMode') !== undefined) {
           if (this.getParameterByName('editMode') === 'widget') {
               // em.set('editorPreview', true)
+              console.error("SET EDITOR PREVIEW TO TRUE");
               this.editor.set('editorPreview', true);
               var that = this;
 
               var fctEnablePreview = function(newCtr) {
                 if (newCtr  >= 100) {
                   //ah
+                  console.error("SET EDITOR PREVIEW TO FAILED LOAD??");
                 //  console.log('HARD STOP')
                   return
                 }
                 var tmp = $("#previewIframe").contents().find('body')
-                console.log('tmp is')
+                console.log('tmp 1 TEST')
                 console.log(tmp)
                 if (tmp.length <= 0) {
                   // console.log('tmp is NOT VALID')

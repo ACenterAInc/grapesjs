@@ -104,10 +104,40 @@ module.exports = Backbone.View.extend({
    * @private
    * */
   updateStatus(e) {
-    var s = this.model.get('status'),
-        pfx = this.pfx;
-    switch(s) {
+    var el = this.el;
+    var status = this.model.get('status');
+    var pfx = this.pfx;
+    var ppfx = this.ppfx;
+    var selectedCls = pfx + 'selected';
+    var selectedParentCls = selectedCls + '-parent';
+    var freezedCls = `${ppfx}freezed`;
+    var actualCls = el.getAttribute('class') || '';
+    var cls = '';
+
+    console.log('TEST SEL')
+    switch (status) {
         case 'selected':
+
+          // HERE FIX SELECTED
+          console.log('<<<<< HEAD selected of a')
+          console.log('selected of a')
+          console.log('selected of a 1')
+          console.log('selected of a 1')
+          console.log(this.model);
+          console.log(this.model.$el);
+
+          console.log('CLOSES PARTIAL IS')
+          var thePartial = $($("#editorIframe").contents().find(this.model.view.$el).closest("[partial]")).attr('partial')
+          console.log('DATA PARAM IS')
+
+          var theDataParamObj = $($("#editorIframe").contents().find(this.model.view.$el).closest("[data-param]"));
+          var theObject = theDataParamObj.attr('data-param');
+
+          console.error('Partial is:');
+          console.error(thePartial + " [ " + theObject + " ] ");
+
+
+          /*
           console.log('selected of a')
           console.log(this.$el)
           console.log(this.model)
@@ -132,7 +162,7 @@ module.exports = Backbone.View.extend({
           } else {
             console.log('not sel');
           }
-          console.log('TEST SEL')
+
 
           console.log('CLOSES PARTIAL IS')
           console.log($($("#editorIframe").contents().find(".gjs-comp-selected").closest("[partial]")).attr('partial'))
@@ -142,8 +172,24 @@ module.exports = Backbone.View.extend({
             break;
         case 'moving':
             break;
+*/
+
+          cls = `${actualCls} ${selectedCls}`;
+          break;
+        case 'selected-parent':
+          cls = `${actualCls} ${selectedParentCls}`;
+          break;
+        case 'freezed':
+          cls = `${actualCls} ${freezedCls}`;
+          break;
         default:
-          this.$el.removeClass(pfx + 'selected');
+          this.$el.removeClass(`${selectedCls} ${selectedParentCls} ${freezedCls}`);
+    }
+
+    cls = cls.trim();
+
+    if (cls) {
+      el.setAttribute('class', cls);
     }
   },
 
@@ -180,17 +226,25 @@ module.exports = Backbone.View.extend({
     if(model.get('src'))
       attributes.src = model.get('src');
 
-
-    if(model.get('highlightable')) {
-      console.error("TEST EDIT ONLY")
-      console.error(window.editor.getConfig().tagEditorOnly);
+    //if(model.get('highlightable')) {
       if (window.editor.getConfig().tagEditorOnly) {
+        console.log('component model');
+        console.log(model);
+        console.log(attributes);
+        attributes['component-hash'] = model.cid;
+        window.components_hash = window.components_hash || {};
+
+        attr['component-hash'] = model.cid;
+        window.components_hash[model.cid] = model;
+
         console.log('test highlight of')
-        if (this.$el.length > 0) {
           try {
+           //if (attr.hasOwnProperty('this.$el.length > 0) {
+
             //Mark highlightable only if has data-param
+
             if (this.attr.hasOwnProperty('partial')) {
-              attributes['data-highlightable'] = 0;
+              attributes['data-highlightable'] = 1;
               model.set('editable', true)
               model.set('highlightable', true);//default value
               model.set('draggable',false);
@@ -200,6 +254,7 @@ module.exports = Backbone.View.extend({
               model.set('badgable',false);
 
             } else if (this.attr.hasOwnProperty('data-param')) {
+              console.log('does it has data-highlightable YESS?')
               attributes['data-highlightable'] = 1;
               model.set('editable', true);
               model.set('highlightable', true);//default value
@@ -211,16 +266,23 @@ module.exports = Backbone.View.extend({
             } else {
               model.set('editable', false);
               model.set('highlightable', false);
+              /*model.set('draggable',false);
+              model.set('resizable',false);
+              model.set('removable',false);
+              model.set('copyable',false);
+              model.set('badgable',false);
+              */
             }
-          } catch (eea) {
 
-          }
+          //}
+        } catch (eea) {
+          console.error(eea.stack);
         }
       } else {
         //mark all items highlitable defualt behavior
         attributes['data-highlightable'] = 1;
       }
-    }
+  //  }
 
     var styleStr = this.getStyleString();
 

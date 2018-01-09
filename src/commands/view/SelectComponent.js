@@ -138,24 +138,47 @@ module.exports = {
    * @private
    */
   onHover(e) {
-    e.stopPropagation();
+
     var trg = e.target;
 
-    console.log("MOUSE OVER");
+
     var isValid = true;
     if (window.editor.getConfig().tagEditorOnly) {
 
+      //console.log('hover test');
       if (trg === undefined || $(trg) === undefined) {
+        //console.log('hover test bad?');
         return;
       }
 
+      //console.error('highlight aaa test');
+      //console.error(trg);
+      //console.error($(trg));
       if (!(($(trg).attr('data-highlightable') >= 0))) {
+        // $(e.target).closest('[nav]').trigger('hover');
+      } else {
+        if ($(trg).data('model') === undefined) {
+            //console.error('NO MODEL');
+            if (window.components_hash != null) {
+              //console.error('GOT HASH MODEL ?');
+              $(trg).data('model',window.components_hash[$(trg).attr('component-hash')]);
+              //console.error($(trg).data('model'));
+            }
+        }
+      }
+
+      //console.error($(trg).attr('data-highlightable'));
+      if (!(($(trg).attr('data-highlightable') >= 0))) {
+        //console.log('hover test bad 11?');
         isValid = false;
       }
     }
 
+    //console.log('hover test valid : ' + isValid);
     if (isValid) {
+      e.stopPropagation();
       // Adjust tools scroll top
+      //console.log('hover test bad !Scrolladjust? ');
       if(!this.adjScroll){
         this.adjScroll = 1;
         this.onFrameScroll(e);
@@ -189,6 +212,7 @@ module.exports = {
   showElementOffset(el, pos) {
     var $el = $(el);
     var model = $el.data('model');
+
     if(model && model.get('status') == 'selected'){
       return;
     }
@@ -243,30 +267,43 @@ module.exports = {
    * @private
    */
   onClick(e) {
+    //console.log('on click here 1');
+    //console.error(e);
+    //console.error($(e.target));
     var m = $(e.target).data('model');
-    if(!m)
-      return;
+    if(!m) {
+      //are we in view monde??
+      if (!window.editor.getConfig().tagEditorOnly) {
+        //console.log('ignoring no model associated');
+        return;
+      } else {
+        this.onSelect(e, e.target);
+        return;
+      }
+    }
     var s  = m.get('stylable');
-    if(!(s instanceof Array) && !s)
+    //console.log('on click here 3');
+    if(!(s instanceof Array) && !s) {
+      //console.log('on click here 4');
       return;
+    }
 
-    console.log('on click of model');
-    console.log(m);
 
+    //console.log('on click here 5');
     var isValid = true;
-    console.log('MODEL HIGHLIGHT ?');
-    console.log(m.get('highlightable'));
-    console.log(m.attributes.highlightable);
-
+    //console.log('on click here 6');
     if (! m.get('highlightable')) {
-      console.log('NOPE NOT HIGHLIGHTABLE triggering');
-      console.error(e);
-      console.error(e.target);
+      //console.log('on click here 7 ??');
       $(e.target).closest('[data-param]').trigger('click')
+      //console.log('on click here 8');
+      //CLICK HERE....
+      //console.error('click element here');
+
       // $("#editorIframe").contents().find("body").find(".dropdown").closest('[data-param]').trigger('click')
       return;
     }
 
+    //console.log('on click here good here');
     this.onSelect(e, e.target);
   },
 
@@ -327,10 +364,44 @@ module.exports = {
    * */
   onSelect(e, el) {
     e.stopPropagation();
+    //console.log('received on select');
     var md   = this.editorModel.get('selectedComponent');
     this.cleanPrevious(md);
     var $el = $(el);
+    //console.log($el);
+    //console.log('received on select (a)');
     var nMd = $el.data('model');
+    //console.log('got selection model?');
+    //console.log(nMd);
+    if (window.editor.getConfig().tagEditorOnly) {
+      if ( nMd === undefined && $el.attr('data-highlightable') > 0) {
+        if ($el.data('model') === undefined) {
+            //console.error('NO MODEL');
+            if (window.components_hash != null) {
+              //console.error('GOT HASH MODEL ?');
+              $el.data('model',window.components_hash[$el.attr('component-hash')]);
+              nMd = $el.data('model');
+              //console.log('set model to');
+              //console.error(nMd);
+            }
+        }
+      }
+
+      if( nMd === undefined || nMd === null) {
+        //console.error($el);
+        //console.log('sending click to');
+        //console.log($el);
+        //console.log('sending click to 1');
+        //console.log($("#editorIframe").contents().find("body").find($el));
+        //console.log('sending click to 2');
+        //console.log($el.closest('[data-param]'));
+        //console.log('sending click to 3');
+        $el.closest('[data-param]').trigger('click');
+        return;
+        //$("#editorIframe").contents().find("body").find(".dropdown").closest('[data-param]').trigger('click')
+      }
+    }
+
     if(nMd) {
       var em = this.em;
       var mirror = nMd.get('mirror');
@@ -369,17 +440,8 @@ module.exports = {
     }
 
     var isValid = true;
-    console.error('MODEL TEST')
-    console.error(this);
-    console.error('GOT MODEL')
-    console.error(model);
-
-    console.log('MODEL HIGHLIGHT ?');
-    console.log(model.get('highlightable'));
-    console.log(model.attributes.highlightable);
 
     if (! model.get('highlightable')) {
-      console.log('NOPE');
       return;
     }
 
@@ -481,7 +543,6 @@ module.exports = {
       var model = this.em.get('selectedComponent');
 
       if (model) {
-        console.log('on frame scroll');
         this.updateToolbarPos(model.view.el);
       }
     }
@@ -493,10 +554,11 @@ module.exports = {
    */
   updateAttached() {
     var model = this.em.get('selectedComponent');
+    //console.error("MODEL IS");
+    // //console.error(model);
+    // //console.error(this.em);
     if (model) {
       var view = model.view;
-      console.log('update attach');
-
 
       var isValid = true;
 

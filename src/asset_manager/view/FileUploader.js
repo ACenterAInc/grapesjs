@@ -42,6 +42,17 @@ module.exports = Backbone.View.extend({
         formData.append('files[]', files[i]);
       }
     var target = this.target;
+
+    console.log("TARGET UPLOAD ISa")
+    console.log(target);
+    console.log(target.model);
+    console.log("TARGET UPLOAD ISb")
+    // console.log(target.model());
+    console.log("TARGET UPLOAD ISc")
+    console.log(target.target.attributes);//
+    console.log(target.target.attributes.attributes['data-param']);//
+    // )
+
     $.ajax({
       url      : this.config.upload,
       type    : 'POST',

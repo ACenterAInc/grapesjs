@@ -42,7 +42,7 @@ module.exports = () => {
        * @return {this}
        */
       init(config) {
-console.error('a1');
+        console.error('a1');
         c = config || {};
         try {
           for (var name in defaults) {

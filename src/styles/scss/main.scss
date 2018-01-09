@@ -153,12 +153,14 @@ $fontV: 20;//random(1000)
   background-color: $mainColor;
 }
 
-.#{$app-prefix}color-main{
+.#{$app-prefix}color-main {
   color: $fontColor;
+  fill: $fontColor;
 }
 
-.#{$app-prefix}color-active{
+.#{$app-prefix}color-active {
   color: $fontColorActive;
+  fill: $fontColorActive;
 }
 
 .#{$app-prefix}bdrag {
@@ -535,6 +537,10 @@ ol.example li.placeholder:before {position: absolute;}
 
 
 /************* Navigator *************/
+
+.#{$nv-prefix}selected-parent {
+	border: 1px solid $colorYell;
+}
 
 .#{$nv-prefix}opac50{
 	@include opacity(0.50);

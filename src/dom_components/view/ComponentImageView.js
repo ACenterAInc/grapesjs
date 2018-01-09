@@ -28,8 +28,12 @@ module.exports = ComponentView.extend({
    * @private
    * */
   updateSrc() {
+    console.error('UPDATE SRC HERE AAAAA');
+    console.error(this.model);
+    this.model.set('changesCount', 1);
     var src = this.model.get("src");
     this.$el.attr('src', src);
+
     if(!src)
       this.$el.addClass(this.classEmpty);
     else

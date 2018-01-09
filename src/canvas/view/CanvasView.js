@@ -31,7 +31,6 @@ module.exports = Backbone.View.extend({
    */
   onFrameScroll() {
     var u = 'px';
-    console.log('documetn body 02');
     var body = this.frame.el.contentDocument.body;
     this.toolsEl.style.top = '-' + body.scrollTop + u;
     this.toolsEl.style.left = '-' + body.scrollLeft + u;
@@ -111,10 +110,7 @@ module.exports = Backbone.View.extend({
    * @private
    */
   renderBody() {
-    console.error("IN HERE A")
     var wrap = this.model.get('frame').get('wrapper');
-    console.error("IN HERE B")
-    console.error(wrap)
     var em = this.config.em;
     if(wrap) {
 
@@ -155,12 +151,50 @@ module.exports = Backbone.View.extend({
       var body = this.frame.$el.contents().find('body');
       var cssc = em.get('CssComposer');
       var conf = em.get('Config');
+      var confCanvas = this.config;
       var protCss = conf.protectedCss;
+      var externalStyles = '';
+
+      confCanvas.styles.forEach((style) => {
+        externalStyles += `<link rel="stylesheet" href="${style}"/>`;
+      });
+
+      // rgb(255, 202, 111)
+      const colorWarn = '#ffca6f';
+
+      let baseCss = `
+        * {
+          box-sizing: border-box;
+        }
+        html, body, #wrapper {
+          min-height: 100%;
+        }
+        html {
+          height: 100%;
+        }
+        body {
+          margin: 0;
+          height: auto;
+          background-color: #fff
+        }
+        #wrapper {
+          overflow: auto
+        }
+      `;
+
+      let layoutCss = `
+        .${ppfx}comp-selected{
+          outline: 3px solid #3b97e3 !important
+        }
+        .${ppfx}comp-selected-parent{
+          outline: 2px solid ${colorWarn} !important
+        }
+      `;
 
       // I need all this styles to make the editor work properly
-      var frameCss = '* {box-sizing: border-box;} body{margin:0;height:auto;background-color:#fff} #wrapper{min-height:100%; overflow:auto}' +
+      var frameCss = baseCss +
         '.' + ppfx + 'dashed :not([contenteditable]) > *[data-highlightable]{outline: 1px dashed rgba(170,170,170,0.7); outline-offset: -2px}' +
-        '.' + ppfx + 'comp-selected{outline: 3px solid #3b97e3 !important}' +
+        layoutCss +
         '.' + ppfx + 'no-select{user-select: none; -webkit-user-select:none; -moz-user-select: none}'+
         '.' + ppfx + 'freezed{opacity: 0.5; pointer-events: none}' +
         '.' + ppfx + 'no-pointer{pointer-events: none}' +
@@ -172,12 +206,12 @@ module.exports = Backbone.View.extend({
         (conf.canvasCss || '');
       frameCss += protCss || '';
 
-      console.error("z3zz")
+      if (externalStyles) {
+        body.append(externalStyles);
+      }
 
       body.append('<style>' + frameCss + '</style>');
 
-      console.error("BODY IS")
-      console.error(body)
       body.append(wrap.render())
       body.append(cssc.render());
       body.append(this.getJsContainer());
@@ -314,7 +348,6 @@ module.exports = Backbone.View.extend({
    * @private
    */
   getPosition() {
-    console.log('document body 03');
     var bEl = this.frame.el.contentDocument.body;
     var fo = this.getFrameOffset();
     var co = this.getCanvasOffset();
@@ -370,14 +403,21 @@ module.exports = Backbone.View.extend({
     this.wrapperPreview  = this.model.get('wrapperPreview');
     this.wrapperCodeEdit  = this.model.get('wrapperCodeEdit');
 
+    ////alert('af1');
     if(this.wrapperCodeEdit && typeof this.wrapperCodeEdit.render == 'function'){
+      //alert('af2');
       this.model.get('frameCodeEdit').set('wrapperCodeEdit', this.wrapperCodeEdit);
+      //alert('af3');
       this.frameCodeEdit.el.id = 'codeEditIframe';
       this.frameCodeEdit.el.classList.add('hidden');
       // this.frameCodeEdit.el.attr('class','hidden');
+      //alert('af4');
       var aff = this.frameCodeEdit.render().el;
+      //alert('af5');
       aff.classList.add('hidden');
+      //alert('af5');
       this.$el.append(aff);
+      //alert('af6');
       var frameCodeEdit = this.frameCodeEdit;
       /*
       if (this.config.scripts.length === 0) {
@@ -404,7 +444,7 @@ module.exports = Backbone.View.extend({
     if(this.wrapperPreview && typeof this.wrapperPreview.render == 'function'){
       this.model.get('framePreview').set('wrapperPreview', this.wrapperPreview);
       this.framePreview.el.id = 'previewIframe';
-      // console.log(this.framePreview)
+
       this.$el.append(this.framePreview.render().el);
       var framePreview = this.framePreview;
       /*

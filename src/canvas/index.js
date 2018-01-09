@@ -93,8 +93,7 @@ module.exports = () => {
      * Returns body element of the frame
      * @return {HTMLElement}
      */
-    getBody() {
-      console.log('document body testa');
+    getBody() {      
       return CanvasView.frame.el.contentDocument.body;
     },
 
