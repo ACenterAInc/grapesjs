@@ -15,3 +15,4 @@ coverage/
 node_modules/
 bower_components/
 dist/
+node_modules

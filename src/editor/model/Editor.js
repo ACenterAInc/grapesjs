@@ -190,6 +190,7 @@ module.exports = Backbone.Model.extend({
 
 
       if (model != undefined)  {
+          var updatedCount = this.get('changesCount') + 1;
           model.set('changesCount', updatedCount);
       }
 

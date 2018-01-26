@@ -61,15 +61,29 @@ module.exports = Backbone.View.extend({
     var m = this.model;
     var trg = this.target;
     var name = m.get('name');
+    name = 'Text';
     var value = this.getValueForTarget();
     // Chabge property if requested otherwise attributes
+    console.error(m);
+    console.error('changing ?');
+    console.error(value);
     if(m.get('changeProp')){
-      trg.set(name, value);
+      m.set(name,value);//set(name, value);
+      m['content']=value;
+      alert('a2');
     }else{
       var attrs = _.clone(trg.get('attributes'));
+      console.error(attrs);
       attrs[name] = value;
+      attrs['content']=value;
+      trg['content']=value;
+      alert('a1');
       trg.set('attributes', attrs);
     }
+    trg.view.$el[0].innerHTML=value;
+    //console.error(trg.view);
+    //console.error(trg.view.$el);
+    console.error(trg);
   },
 
   /**
@@ -112,11 +126,15 @@ module.exports = Backbone.View.extend({
       console.error('modeltest a');
       console.error(md);
       var trg = this.target;
-
-      if (trg === null) {
-        trg=md.attributes;
-      }
-
+      console.error('trait aa');
+      console.error(md);
+      console.error(md.attributes);
+      console.error(md.attributes.traits);
+      // if (trg === null) {
+        trg= md.attributes.traits.target;
+        this.target = trg;
+        trg.set('name','innerHTML');
+      // }
       console.error('modeltest b');
       console.error(trg);
       var name = md.get('name');

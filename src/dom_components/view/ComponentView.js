@@ -125,17 +125,26 @@ module.exports = Backbone.View.extend({
           console.log('selected of a 1')
           console.log(this.model);
           console.log(this.model.$el);
+          try {
+              if (window.editor.getConfig().tagEditorOnly) {
+                console.log('CLOSES PARTIAL IS')
+                var thePartial = $($("#editorIframe").contents().find(this.model.view.$el).closest("[partial]")).attr('partial')
+                console.log('DATA PARAM IS')
 
-          console.log('CLOSES PARTIAL IS')
-          var thePartial = $($("#editorIframe").contents().find(this.model.view.$el).closest("[partial]")).attr('partial')
-          console.log('DATA PARAM IS')
+                var theDataParamObj = $($("#editorIframe").contents().find(this.model.view.$el).closest("[data-param]"));
+                var theObject = theDataParamObj.attr('data-param');
 
-          var theDataParamObj = $($("#editorIframe").contents().find(this.model.view.$el).closest("[data-param]"));
-          var theObject = theDataParamObj.attr('data-param');
+                if (! $(".gjs-pn-btn.fa.fa-paint-brush").hasClass('gjs-pn-active') ) {
+                  $(".gjs-pn-btn.fa.fa-paint-brush").trigger('click');
+                }
 
-          console.error('Partial is:');
-          console.error(thePartial + " [ " + theObject + " ] ");
-
+                console.error('Partial is:');
+                console.error(thePartial + " [ " + theObject + " ] ");
+              }
+          } catch (ew) {
+              console.error('COULDNT SELECT ELEMENT TO EDIT...');
+              console.error(ew.stack);
+          }
 
           /*
           console.log('selected of a')

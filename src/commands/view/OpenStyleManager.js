@@ -91,10 +91,13 @@ module.exports = {
         return;
 
       console.log('active a');
+      console.log('select AA');
       if(this.target.get('selectedComponent')){
+          console.log('select BB');
           //At this point an element is selected... but ??? what are our state ?
           if (window.editor.getConfig().tagEditorOnly) {
             console.log('active tag only');
+            console.log('select CC');
 
             /*
             sectors: [{
@@ -160,16 +163,20 @@ module.exports = {
 
 
             // this.$cn4.show();
+            // this.$cn2.show();
+
             this.$header.hide();
 
             // this.$cn2.hide();
             // this.$header.show();
           } else {
             console.log('active bb');
+            console.log('select DD');
             this.$cn2.show();
             this.$header.hide();
           }
       }else{
+          console.log('select EE');
           console.log('active cc');
           this.$cn2.hide();
           this.$cn3.hide();

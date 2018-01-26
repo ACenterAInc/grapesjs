@@ -87,7 +87,7 @@ module.exports = () => {
       var ppfx = c.pStylePrefix;
       if(ppfx)
         c.stylePrefix = ppfx + c.stylePrefix;
-
+      
       sectors = new Sectors(c.sectors);
       SectView   = new SectorsView({
         collection: sectors,

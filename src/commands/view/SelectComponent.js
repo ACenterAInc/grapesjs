@@ -364,7 +364,7 @@ module.exports = {
    * */
   onSelect(e, el) {
     e.stopPropagation();
-    //console.log('received on select');
+    console.log('received on select');
     var md   = this.editorModel.get('selectedComponent');
     this.cleanPrevious(md);
     var $el = $(el);
@@ -373,7 +373,9 @@ module.exports = {
     var nMd = $el.data('model');
     //console.log('got selection model?');
     //console.log(nMd);
+    console.log('received on select tag only?');
     if (window.editor.getConfig().tagEditorOnly) {
+      console.log('received on select tag only? true');
       if ( nMd === undefined && $el.attr('data-highlightable') > 0) {
         if ($el.data('model') === undefined) {
             //console.error('NO MODEL');
@@ -387,6 +389,8 @@ module.exports = {
         }
       }
 
+      console.log('received GOT NMd ?');
+      console.log(nMd);
       if( nMd === undefined || nMd === null) {
         //console.error($el);
         //console.log('sending click to');
@@ -403,6 +407,7 @@ module.exports = {
     }
 
     if(nMd) {
+      console.log('GOT NMD');
       var em = this.em;
       var mirror = nMd.get('mirror');
       nMd = mirror ? mirror : nMd;
@@ -420,7 +425,9 @@ module.exports = {
         parent = parent.collection ? parent.collection.parent : null;
       }
 
+      console.log('editorModel set SelectedComponent');
       this.editorModel.set('selectedComponent', nMd);
+      console.log('set modelStatus to selected');
       nMd.set('status','selected');
       this.showFixedElementOffset(el);
       this.hideElementOffset();

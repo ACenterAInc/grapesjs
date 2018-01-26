@@ -11,10 +11,12 @@
  *
  * @module DeviceManager
  */
+
 module.exports = () => {
   var c = {},
   defaults = require('./config/config'),
-  HugoView = require('./view/HugoView');
+  HugoView = require('./view/HugoView'),
+  TraitView = require('./view/TraitView');
   var view;
 
   return {
@@ -117,7 +119,14 @@ module.exports = () => {
             console.error(z.stack);
         }
         console.log("render here");
-        return view.render().el;
+        var hugoView = view.render().el;
+
+        var traitView = new TraitView({
+          config: c,
+          model: window.editor.editor.get('selectedComponent')
+        });
+        hugoView.append(traitView.render().el);
+        return hugoView;
       },
 
   };
